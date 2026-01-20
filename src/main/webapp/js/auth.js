@@ -21,7 +21,7 @@ if(loginForm){
 
             const res = await sendForm(loginForm);
             if(res.status == 200){
-                window.location.href = "/MyServletApp_war_exploded/dashboard";
+                window.location.replace("/MyServletApp_war_exploded/dashboard");
             }else{
                 showMessage(res.message, "error")
             }
