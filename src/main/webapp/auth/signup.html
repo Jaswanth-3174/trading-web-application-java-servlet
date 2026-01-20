@@ -1,0 +1,33 @@
+<html>
+    <head>
+        <title>Sign up</title>
+    </head>
+    <body>
+        <h1>Create your account!</h1>
+        <form action="../signup" method="post">
+            <label>Name</label>
+            <input type="text" name="username" required placeholder="Enter your username"><br><br>
+
+            <label>Password</label>
+            <input type="password" name="password" required placeholder="Enter your password"><br><br>
+
+            <label>Confirm Password</label>
+            <input type="password" name="confirm_password" required placeholder="Confirm your password"><br><br>
+
+            <label>PAN number</label>
+            <input type="text" name="pan_number" required placeholder="Enter your pan number"><br><br>
+
+            <label>Demat account password</label>
+            <input type="password" name="demat_password" required placeholder="Enter your demat password"><br><br>
+
+            <label>Are you an Promoter?</label>
+            <input type="radio" name="is_promoter" value="yes" required> Yes
+            <input type="radio" name="is_promoter" value="no"> No <br><br>
+
+            <button type="submit">Sign up</button><br><br>
+        </form>
+        <p>
+            <a href="login.html">Already have an account?</a>
+        </p>
+    </body>
+</html>
