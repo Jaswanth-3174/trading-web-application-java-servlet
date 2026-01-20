@@ -18,7 +18,7 @@ public class DashboardServlet extends HttpServlet {
 
         if (session == null || session.getAttribute("username") == null) {
             // Not logged in
-            res.sendRedirect("/MyServletApp_war_exploded/index.html");
+            res.sendRedirect("/MyServletApp_war_exploded/");
             return;
         }
 
