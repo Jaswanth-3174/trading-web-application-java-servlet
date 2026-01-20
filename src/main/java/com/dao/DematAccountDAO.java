@@ -10,21 +10,22 @@ public class DematAccountDAO {
 
     private static String tableName = "demat_accounts";
 
-    public DematAccount findById(int dematId) throws SQLException {
+    public DematAccount findById(int dematId){
         Condition c = new Condition();
         c.add("demat_id", dematId);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToDematAccount(rows.get(0)) : null;
     }
 
-    public DematAccount findByPanNumber(String panNumber) throws SQLException {
+    public DematAccount findByPanNumber(String panNumber) {
         Condition c = new Condition();
         c.add("pan_number", panNumber);
-        ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
+        ArrayList<HashMap<String, Object>> rows = null;
+        rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToDematAccount(rows.get(0)) : null;
     }
 
-    public DematAccount createDematAccount(String panNumber, String password) throws SQLException {
+    public DematAccount createDematAccount(String panNumber, String password){
         Condition data = new Condition();
         data.add("pan_number", panNumber);
         data.add("password", password);

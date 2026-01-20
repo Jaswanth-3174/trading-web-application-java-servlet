@@ -18,12 +18,8 @@ public class SignupServlet extends HttpServlet {
         String dematPassword = req.getParameter("demat_password");
         boolean isPromoter = (boolean) req.getParameter("is_promoter").equals("yes") ? true : false;
 
-        try {
-            String success = "Account created Successfully!";
-            String result = authService.signup(username, password,
-                    confirmPassword, panNumber, dematPassword, isPromoter);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String result = authService.signup(username, password,
+                confirmPassword, panNumber, dematPassword, isPromoter);
+
     }
 }

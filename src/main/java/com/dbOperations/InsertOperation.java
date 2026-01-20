@@ -5,7 +5,7 @@ import java.util.*;
 
 public class InsertOperation {
 
-    public static int insert(String table, Condition data) throws SQLException {
+    public static int insert(String table, Condition data) {
         String tableName = table.split(" ")[0];
         if (data == null || data.isEmpty()) {
             return -1;
@@ -29,18 +29,22 @@ public class InsertOperation {
 
         String sql = "INSERT INTO " + tableName + " (" + columns + ") VALUES (" + placeholders + ")";
        // System.out.println("DEBUG INSERT SQL: " + sql);
+        try {
 
-        Connection con = DbHelper.getConnection();
-        PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
-        for (int i = 0; i < values.size(); i++) {
-            ps.setObject(i + 1, values.get(i));
+            Connection con = DbHelper.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            for (int i = 0; i < values.size(); i++) {
+                ps.setObject(i + 1, values.get(i));
+            }
+            ps.executeUpdate();
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                return rs.getInt(1);
+            }
+            return -1;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        ps.executeUpdate();
-        ResultSet rs = ps.getGeneratedKeys();
-        if (rs.next()) {
-            return rs.getInt(1);
-        }
-        return -1;
     }
 }
 

@@ -11,7 +11,7 @@ public class UserDAO {
 
     private static String tableName = "users";
 
-    public User findById(int userId) throws SQLException {
+    public User findById(int userId) {
         Condition c = new Condition();
         c.add("user_id", userId);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
@@ -33,7 +33,7 @@ public class UserDAO {
         return !rows.isEmpty() ? mapToUser(rows.get(0)) : null;
     }
 
-    public User createUser(String userName, String password, int dematId, boolean isPromoter) throws SQLException {
+    public User createUser(String userName, String password, int dematId, boolean isPromoter) {
         if (isUsernameTaken(userName)) {
             return null;
         }
@@ -46,24 +46,26 @@ public class UserDAO {
         return userId > 0 ? findById(userId) : null;
     }
 
-    public boolean isUsernameTaken(String username) throws SQLException {
+    public boolean isUsernameTaken(String username) {
         Condition c = new Condition();
         c.add("username", username);
         c.add("isActive", true);
-        ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, new String[]{"user_id"}, c);
+        ArrayList<HashMap<String, Object>> rows = null;
+        rows = SelectOperation.select(tableName, new String[]{"user_id"}, c);
         return !rows.isEmpty();
     }
 
-    public User authenticateUser(String username, String password) throws SQLException {
+    public User authenticateUser(String username, String password) {
         Condition c = new Condition();
         c.add("username", username);
         c.add("password", password);
         c.add("isActive", true);
-        ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
+        ArrayList<HashMap<String, Object>> rows = null;
+        rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToUser(rows.get(0)) : null;
     }
 
-    public boolean isActiveUserLinkedWithDematId(int dematId) throws SQLException {
+    public boolean isActiveUserLinkedWithDematId(int dematId) {
         Condition c = new Condition();
         c.add("demat_id", dematId);
         c.add("isActive", true);

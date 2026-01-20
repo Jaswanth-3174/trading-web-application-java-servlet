@@ -5,21 +5,19 @@ import com.dao.DematAccountDAO;
 import com.dao.UserDAO;
 import com.trading.User;
 
-import java.sql.SQLException;
-
 public class AuthService {
     private UserDAO userDAO = new UserDAO();
     private DematAccountDAO dematAccountDAO = new DematAccountDAO();
 
-    public boolean login(String userName, String password) throws SQLException {
+    public String login(String userName, String password){
         User user = userDAO.authenticateUser(userName, password);
-        if(user == null) return false;
-        return true;
+        if(user == null) return "Invalid username or password";
+        return "Success";
     }
 
     public String signup(String userName, String password, String confirmPassword,
                           String panNumber, String dematPassword,
-                          boolean isPromoter) throws SQLException{
+                          boolean isPromoter){
 
         if(userDAO.isUsernameTaken(userName)){
             return "User name taken!";
@@ -46,6 +44,6 @@ public class AuthService {
         }
 
         userDAO.createUser(userName, password, dematAccount.getDematAccountId(), isPromoter);
-        return "Account created Successfully!";
+        return "SUCCESS";
     }
 }

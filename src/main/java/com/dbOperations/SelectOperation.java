@@ -7,13 +7,13 @@ public class SelectOperation {
 
     // basic select
     public static ArrayList<HashMap<String, Object>>
-    select(String tableName, Condition condition) throws SQLException {
+    select(String tableName, Condition condition){
         return selectWithAdvancedCondition(tableName, null,
                 null, condition, null, null, 0);
     }
 
     public static ArrayList<HashMap<String, Object>>
-    select(String tableName, String[] columns, Condition condition) throws SQLException {
+    select(String tableName, String[] columns, Condition condition) {
         return selectWithAdvancedCondition(tableName, columns, null, condition,
                 null, null, 0);
     }
@@ -35,7 +35,7 @@ public class SelectOperation {
     public static ArrayList<HashMap<String, Object>>
     selectWithAdvancedCondition(String table,
             String[] columns, String join, Condition base, SpecialCondition extra,
-            String orderBy, int limit) throws SQLException {
+            String orderBy, int limit) {
 
         ArrayList<HashMap<String, Object>> rows = new ArrayList<>();
         String columnList = (columns == null || columns.length == 0)
@@ -68,33 +68,36 @@ public class SelectOperation {
         }
 
         // System.out.println("SELECT DEBUG => " + sql);  // debug
+        try {
+            Connection con = DbHelper.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql.toString());
 
-        Connection con = DbHelper.getConnection();
-        PreparedStatement ps = con.prepareStatement(sql.toString());
-
-        int idx = 1;
-        if (base != null) {
-            for (Object v : base.getValues()) {
-                ps.setObject(idx++, v);
+            int idx = 1;
+            if (base != null) {
+                for (Object v : base.getValues()) {
+                    ps.setObject(idx++, v);
+                }
             }
-        }
 
-        if (extra != null) {
-            for (Object v : extra.getValues()) {
-                ps.setObject(idx++, v);
+            if (extra != null) {
+                for (Object v : extra.getValues()) {
+                    ps.setObject(idx++, v);
+                }
             }
-        }
 
-        ResultSet rs = ps.executeQuery();
-        ResultSetMetaData meta = rs.getMetaData();
-        int colCount = meta.getColumnCount();
-        while (rs.next()) {
-            HashMap<String, Object> row = new HashMap<>();
-            for (int i = 1; i <= colCount; i++) {
-                row.put(meta.getColumnLabel(i), rs.getObject(i));
+            ResultSet rs = ps.executeQuery();
+            ResultSetMetaData meta = rs.getMetaData();
+            int colCount = meta.getColumnCount();
+            while (rs.next()) {
+                HashMap<String, Object> row = new HashMap<>();
+                for (int i = 1; i <= colCount; i++) {
+                    row.put(meta.getColumnLabel(i), rs.getObject(i));
+                }
+                rows.add(row);
             }
-            rows.add(row);
+            return rows;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
-        return rows;
     }
 }

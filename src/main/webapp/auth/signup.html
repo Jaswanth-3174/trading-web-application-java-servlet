@@ -4,8 +4,9 @@
     </head>
     <body>
         <h1>Create your account!</h1>
-        <form action="../signup" method="post">
-            <label>Name</label>
+        <form id="signupForm">
+            <input type="hidden" name="action" value="signup">
+
             <input type="text" name="username" required placeholder="Enter your username"><br><br>
 
             <label>Password</label>

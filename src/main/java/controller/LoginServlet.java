@@ -7,8 +7,6 @@ import jakarta.servlet.http.HttpSession;
 import service.AuthService;
 
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.SQLException;
 
 public class LoginServlet extends HttpServlet {
 
@@ -18,7 +16,7 @@ public class LoginServlet extends HttpServlet {
         String userName = req.getParameter("username");
         String password = req.getParameter("password");
         try{
-            if(!authService.login(userName, password)){
+            if(!Boolean.parseBoolean(authService.login(userName, password))){
                 res.sendRedirect("auth/login.html?msg=invalid");
                 return;
             }

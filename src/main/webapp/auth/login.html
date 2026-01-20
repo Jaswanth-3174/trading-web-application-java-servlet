@@ -4,7 +4,9 @@
     </head>
     <body>
         <h1>Welcome back!</h1>
-        <form action="../login" method="post">
+        <form id="loginForm">
+            <input type="hidden" name="action" value="login">
+
             <label>Name</label>
             <input type="text" name="username" required placeholder="Enter your username"><br><br>
 
@@ -13,8 +15,12 @@
 
             <button type="submit">Login</button>
         </form>
+
         <p>
             <a href="signup.html">New user?</a>
-        </p>
+        </p><br>
+
+        <p id="message" class="message"></p>
+        <script src="../js/auth.js"></script>
     </body>
 </html>
