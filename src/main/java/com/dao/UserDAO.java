@@ -18,11 +18,19 @@ public class UserDAO {
         return !rows.isEmpty() ? mapToUser(rows.get(0)) : null;
     }
 
-    public static String findUsernameById(int userId) throws SQLException {
+    public static String findUsernameById(int userId)  {
         Condition c = new Condition();
         c.add("user_id", userId);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, new String[]{"username"}, c);
         return !rows.isEmpty() ? (String) rows.get(0).get("username") : null;
+    }
+
+    public User findByUsername(String username) {
+        Condition c = new Condition();
+        c.add("username", username);
+        ArrayList<HashMap<String, Object>> rows =
+                SelectOperation.select(tableName, c);
+        return !rows.isEmpty() ? mapToUser(rows.get(0)) : null;
     }
 
     public User findByDematId(int dematId) throws SQLException {
@@ -73,7 +81,7 @@ public class UserDAO {
         return !rows.isEmpty();
     }
 
-    public boolean deleteUser(int userId) throws SQLException {
+    public boolean deleteUser(int userId) {
         DatabaseConfig.beginTransaction();
         try {
             // Cancel pending orders
@@ -94,7 +102,11 @@ public class UserDAO {
             return affected > 0;
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 

@@ -7,7 +7,6 @@ import jakarta.servlet.http.HttpSession;
 import service.AuthService;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 public class AuthServlet extends HttpServlet {
 
@@ -39,13 +38,11 @@ public class AuthServlet extends HttpServlet {
             HttpSession session = req.getSession();
             session.setAttribute("username", userName);
             res.setStatus(200);
-
-            PrintWriter out = res.getWriter();
-            out.write(result);
-        }else{
+        } else {
             res.setStatus(401);
             res.getWriter().write(result);
         }
+
     }
 
     private void signup(HttpServletRequest req, HttpServletResponse res) throws IOException{
@@ -59,20 +56,25 @@ public class AuthServlet extends HttpServlet {
         String result = authService.signup(username, password,
                     confirmPassword, panNumber, dematPassword, isPromoter);
 
-        if(result.equals("SUCCESS")){
-            req.getSession().setAttribute("username", username);
+        if(result.equals("Success")){
+            HttpSession session = req.getSession();
+            session.setAttribute("username", username);
+            res.setStatus(200);
         } else {
-            res.setStatus(400);
+            res.setStatus(401);
             res.getWriter().write(result);
         }
     }
 
     private void logout(HttpServletRequest req, HttpServletResponse res) throws IOException {
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        res.setHeader("Pragma", "no-cache");
+        res.setDateHeader("Expires", 0);
+
         HttpSession session = req.getSession(false);
         if (session != null) {
             session.invalidate();
         }
-        res.setStatus(200);
         res.getWriter().write("Logged out");
     }
 }

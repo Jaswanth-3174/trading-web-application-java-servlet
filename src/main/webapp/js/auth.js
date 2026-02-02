@@ -1,52 +1,59 @@
-async function sendForm(form) {
-    const params = new URLSearchParams(new FormData(form));
+const loginForm = document.getElementById("loginForm");
+if (loginForm) {
+    loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    const res = await fetch("/MyServletApp_war_exploded/auth", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: params.toString()
+        const formData = new URLSearchParams(new FormData(loginForm));
+
+        const res = await fetch("/MyServletApp_war_exploded/auth", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData.toString()
+        });
+
+        if (res.status === 200) {
+            window.location.replace("/MyServletApp_war_exploded/dashboard");
+        } else {
+            const message = await res.text();
+            document.getElementById("message").textContent = message;
+        }
     });
-
-    const message = await res.text();
-    return { status: res.status, message };
 }
 
+const signupForm = document.getElementById("signupForm");
+if(signupForm){
+    signupForm.addEventListener("submit", async(e) => {
+        e.preventDefault();
 
-const loginForm = document.getElementById("loginForm");
-if(loginForm){
-    loginForm.addEventListener("submit", async(e) => {
-            e.preventDefault();
-
-            const res = await sendForm(loginForm);
-            if(res.status == 200){
-                window.location.replace("/MyServletApp_war_exploded/dashboard");
-            }else{
-                showMessage(res.message, "error")
-            }
+        const formData = new URLSearchParams(new FormData(signupForm));
+        const res = await fetch("/MyServletApp_war_exploded/auth", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: formData.toString()
+        });
+        if (res.status === 200) {
+            window.location.replace("/MyServletApp_war_exploded/dashboard");
+        } else {
+            const message = await res.text();
+            document.getElementById("message").textContent = message;
         }
-    );
+    });
 }
 
 const logoutForm = document.getElementById("logoutForm");
-if (logoutForm) {
-    logoutForm.addEventListener("submit", async (e) => {
+if(logoutForm){
+    logoutForm.addEventListener("submit", async(e) => {
         e.preventDefault();
 
-        const res = await sendForm(logoutForm);
+        const formData = new URLSearchParams(new FormData(logoutForm));
+        const res = await fetch("/MyServletApp_war_exploded/auth", {
+            method: "POST",
+            headers: {"Content-Type": "application/x-www-form-urlencoded"},
+            body: formData.toString()
+        });
 
-        if (res.status === 200) {
-            window.location.replace("/MyServletApp_war_exploded/index.html");
-
-        } else {
-            showMessage(res.message, "error");
+        if(res.status == 200){
+            window.location.href = "/MyServletApp_war_exploded/index.html";
         }
     });
-}
-
-function showMessage(message, type){
-    const el = document.getElementById("message");
-    el.textContent = message;
-    el.className = "message " + type;
 }

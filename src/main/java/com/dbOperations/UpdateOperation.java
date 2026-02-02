@@ -4,7 +4,7 @@ import java.sql.*;
 
 public class UpdateOperation {
 
-    public static int update(String table, Condition setData, Condition whereCondition) throws SQLException {
+    public static int update(String table, Condition setData, Condition whereCondition) {
 
         if (setData == null || setData.isEmpty()) {
             return 0;
@@ -20,17 +20,39 @@ public class UpdateOperation {
             sql = "UPDATE " + tableName + " SET " + setSQL + " WHERE " + whereCondition.toSQL();
         }
 
-        Connection con = DbHelper.getConnection();
-        PreparedStatement ps = con.prepareStatement(sql);
+        Connection con = null;
+        try {
+            con = DbHelper.getConnection();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        PreparedStatement ps = null;
+        try {
+            ps = con.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         int i = 1;
         for (Object val : setData.getValues()) {
-            ps.setObject(i++, val);
+            try {
+                ps.setObject(i++, val);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         if (whereCondition != null) {
             for (Object val : whereCondition.getValues()) {
-                ps.setObject(i++, val);
+                try {
+                    ps.setObject(i++, val);
+                } catch (SQLException e) {
+                    throw new RuntimeException(e);
+                }
             }
         }
-        return ps.executeUpdate();
+        try {
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 }

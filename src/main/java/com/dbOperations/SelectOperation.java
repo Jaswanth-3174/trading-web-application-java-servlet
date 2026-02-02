@@ -21,13 +21,13 @@ public class SelectOperation {
     // select with joins
     public static ArrayList<HashMap<String, Object>>
     selectWithJoin(String tableName, String[] columns, String join,
-                   Condition condition, String order) throws SQLException {
+                   Condition condition, String order){
         return selectWithAdvancedCondition(tableName, columns, join, condition, null, order, 0);
     }
 
     public static ArrayList<HashMap<String, Object>>
     selectWithJoin(String tableName, String[] columns, String join, Condition condition,
-                   String order, int limit) throws SQLException {
+                   String order, int limit){
         return selectWithAdvancedCondition(tableName, columns, join, condition, null,
                 order, limit);
     }

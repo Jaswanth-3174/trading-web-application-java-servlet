@@ -16,7 +16,7 @@ public class OrderDAO {
 
     private int size = 10; // for getting orders sell/buy
 
-    public Order findById(int orderId) throws SQLException {
+    public Order findById(int orderId) {
         Condition c = new Condition();
         c.add("o.order_id", orderId);
         ArrayList<HashMap<String, Object>> rows =
@@ -46,7 +46,7 @@ public class OrderDAO {
         return DeleteOperation.delete(table, c);
     }
 
-    public List<Order> getBuyOrders(int stockId) throws SQLException {
+    public List<Order> getBuyOrders(int stockId) {
         Condition c = new Condition();
         c.add("stock_id", stockId);
         c.add("is_buy", true);
@@ -56,7 +56,7 @@ public class OrderDAO {
         return mapToOrderList(rows);
     }
 
-    public List<Order> getSellOrders(int stockId) throws SQLException {
+    public List<Order> getSellOrders(int stockId){
         Condition c = new Condition();
         c.add("stock_id", stockId);
         c.add("is_buy", false);
@@ -66,8 +66,7 @@ public class OrderDAO {
         return mapToOrderList(rows);
     }
 
-    public List<Order> getNextBuyOrders(int stockId, double lastPrice, int lastOrderId)
-            throws SQLException {
+    public List<Order> getNextBuyOrders(int stockId, double lastPrice, int lastOrderId) {
         Condition base = new Condition();
         base.add("stock_id", stockId);
         base.add("is_buy", true);
@@ -82,8 +81,7 @@ public class OrderDAO {
         return mapToOrderList(rows);
     }
 
-    public List<Order> getNextSellOrders(int stockId, double lastPrice, int lastOrderId)
-            throws SQLException {
+    public List<Order> getNextSellOrders(int stockId, double lastPrice, int lastOrderId) {
         Condition base = new Condition();
         base.add("stock_id", stockId);
         base.add("is_buy", false);
@@ -122,7 +120,7 @@ public class OrderDAO {
 //        return rows.isEmpty() ? null : mapToOrder(rows.get(0));
 //    }
 
-    public List<Order> findByUserId(int userId) throws SQLException {
+    public List<Order> findByUserId(int userId) {
         Condition c = new Condition();
         c.add("o.user_id", userId);
 
@@ -168,18 +166,19 @@ public class OrderDAO {
         return DeleteOperation.delete(table, where) > 0;
     }
 
-    private Order mapToOrder(HashMap<String, Object> row) throws SQLException{
+    private Order mapToOrder(HashMap<String, Object> row){
         Order order = new Order();
         order.setOrderId(((Number) row.get("order_id")).intValue());
         order.setUserId(((Number) row.get("user_id")).intValue());
         order.setStockId(((Number) row.get("stock_id")).intValue());
+
         order.setQuantity(((Number) row.get("quantity")).intValue());
         order.setPrice(((Number) row.get("price")).doubleValue());
         order.setBuy((Boolean) row.get("is_buy"));
         return order;
     }
 
-    private List<Order> mapToOrderList(ArrayList<HashMap<String, Object>> rows) throws SQLException{
+    private List<Order> mapToOrderList(ArrayList<HashMap<String, Object>> rows){
         List<Order> orders = new ArrayList<>();
         for (HashMap<String, Object> row : rows) {
             orders.add(mapToOrder(row));

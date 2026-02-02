@@ -27,8 +27,12 @@ public class DatabaseConfig {
             return con;
         }
 
-    public static void beginTransaction() throws SQLException {
-        getConnection().setAutoCommit(false);
+    public static void beginTransaction(){
+        try {
+            getConnection().setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public static void commit() throws SQLException {

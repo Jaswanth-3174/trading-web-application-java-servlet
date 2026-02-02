@@ -1,21 +1,97 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate">
-        <meta http-equiv="Pragma" content="no-cache">
-        <title>Dashboard</title>
-    </head>
-    <body>
-        <h1>Welcome to Dashboard</h1>
-        <p>Login successful!</p>
+<head>
+    <title>Trading Dashboard</title>
 
-        <form id="logoutForm">
-            <input type="hidden" name="action" value="logout">
-            <button type="submit">Logout</button>
-        </form>
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
 
-        <p id="message" class="message"></p>
+    <style>
+        body{
+            margin:0;
+            font-family:Arial, sans-serif;
+            background:#f8fafc;
+        }
 
-        <script src="../js/auth.js"></script>
+        .topbar{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            background:deepskyblue;
+            color:white;
+            padding:12px 20px;
+        }
 
-    </body>
+        .logout{
+            background:red;
+            color:white;
+            border:none;
+            padding:8px 14px;
+            border-radius:6px;
+            cursor:pointer;
+        }
+
+        .nav{
+            background:#1e293b;
+            padding:10px;
+        }
+
+        .nav button{
+            margin-right:10px;
+            padding:8px 14px;
+            background:white;
+            border:none;
+            border-radius:4px;
+            cursor:pointer;
+        }
+
+        #subnav{
+            padding:10px;
+            background:#e2e8f0;
+        }
+
+        #subnav button{
+            margin-right:8px;
+            padding:6px 12px;
+            border:none;
+            cursor:pointer;
+        }
+
+        #content{
+            padding:20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="topbar">
+    <h2 id="name">Trading Dashboard</h2>
+
+    <form id="logoutForm">
+        <input type="hidden" name="action" value="logout">
+        <button class="logout">Logout</button>
+    </form>
+</div>
+
+<div class="nav">
+    <button onclick="showOrders()">Orders</button>
+    <button onclick="showMarket()">Market</button>
+    <button onclick="showAccount()">Account</button>
+    <button onclick="showReports()">Reports</button>
+</div>
+
+<div id="subnav">
+    Select a category above
+</div>
+
+<div id="content">
+    Select an action
+</div>
+
+<script src="/MyServletApp_war_exploded/js/dashboard.js"></script>
+<script src="/MyServletApp_war_exploded/js/auth.js"></script>
+
+</body>
 </html>

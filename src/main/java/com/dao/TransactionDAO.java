@@ -42,7 +42,7 @@ public class TransactionDAO {
         return rows.isEmpty() ? null : mapToTransaction(rows.get(0));
     }
 
-    public List<Transaction> findByUserId(int userId) throws SQLException {
+    public List<Transaction> findByUserId(int userId) {
         SpecialCondition extra = new SpecialCondition("t.buyer_id = ? OR t.seller_id = ?",
                 userId, userId);
         ArrayList<HashMap<String, Object>> rows =
@@ -51,14 +51,14 @@ public class TransactionDAO {
         return mapToRowList(rows);
     }
 
-    public List<Transaction> findAll() throws SQLException {
+    public List<Transaction> findAll() {
         ArrayList<HashMap<String, Object>> rows =
                 SelectOperation.selectWithJoin(tableAlias, columns, joinCondition,
                         null, null);
         return mapToRowList(rows);
     }
 
-    private Transaction mapToTransaction(HashMap<String, Object> row) throws SQLException{
+    private Transaction mapToTransaction(HashMap<String, Object> row){
         Transaction t = new Transaction();
         t.setTransactionId(((Number) row.get("transactions_id")).intValue());
         t.setBuyerId(((Number) row.get("buyer_id")).intValue());
@@ -69,7 +69,7 @@ public class TransactionDAO {
         return t;
     }
 
-    private List<Transaction> mapToRowList(ArrayList<HashMap<String, Object>> rows) throws SQLException{
+    private List<Transaction> mapToRowList(ArrayList<HashMap<String, Object>> rows){
         List<Transaction> transactions = new ArrayList<>();
         for (HashMap<String, Object> row : rows) {
             transactions.add(mapToTransaction(row));

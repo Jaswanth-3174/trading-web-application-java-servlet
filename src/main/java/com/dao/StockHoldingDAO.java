@@ -23,7 +23,7 @@ public class StockHoldingDAO {
         return rows.isEmpty() ? null : mapToRow(rows.get(0));
     }
 
-    public List<StockHolding> findByDematId(int dematId) throws SQLException {
+    public List<StockHolding> findByDematId(int dematId) {
         Condition where = new Condition();
         where.add("h.demat_id", dematId);
         ArrayList<HashMap<String, Object>> rows =
@@ -31,7 +31,7 @@ public class StockHoldingDAO {
         return mapToRowList(rows);
     }
 
-    public StockHolding findByDematAndStock(int dematId, int stockId) throws SQLException {
+    public StockHolding findByDematAndStock(int dematId, int stockId){
         Condition where = new Condition();
         where.add("h.demat_id", dematId);
         where.add("h.stock_id", stockId);

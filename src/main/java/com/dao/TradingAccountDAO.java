@@ -3,6 +3,7 @@ package com.dao;
 import com.dbOperations.*;
 import com.account.TradingAccount;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -10,14 +11,14 @@ public class TradingAccountDAO {
 
     private static String tableName = "trading_accounts";
 
-    public TradingAccount findByUserId(int userId) throws SQLException {
+    public TradingAccount findByUserId(int userId) {
         Condition c = new Condition();
         c.add("user_id", userId);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToTradingAccount(rows.get(0)) : null;
     }
 
-    public TradingAccount createTradingAccount(int userId, double balance) throws SQLException {
+    public TradingAccount createTradingAccount(int userId, double balance){
         Condition data = new Condition();
         data.add("user_id", userId);
         data.add("balance", balance);
@@ -61,7 +62,7 @@ public class TradingAccountDAO {
         return UpdateOperation.update(tableName, set, where) > 0;
     }
 
-    public boolean credit(int userId, double amount) throws SQLException {
+    public boolean credit(int userId, double amount) {
         TradingAccount acc = findByUserId(userId);
         if (acc == null) return false;
 
@@ -72,7 +73,7 @@ public class TradingAccountDAO {
         return UpdateOperation.update(tableName, set, where) > 0;
     }
 
-    public double getAvailableBalance(int userId) throws SQLException {
+    public double getAvailableBalance(int userId) {
         TradingAccount acc = findByUserId(userId);
         return acc != null ? acc.getBalance() : 0.0;
     }
@@ -92,4 +93,5 @@ public class TradingAccountDAO {
         account.setReservedBalance(((Number) row.get("reserved_balance")).doubleValue());
         return account;
     }
+
 }

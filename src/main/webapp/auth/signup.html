@@ -1,33 +1,50 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>Sign up</title>
-    </head>
-    <body>
-        <h1>Create your account!</h1>
-        <form id="signupForm" action="../signup" method="post">
-            <label>Name</label>
-            <input type="text" name="username" required placeholder="Enter your username"><br><br>
+<head>
+    <title>Sign Up</title>
+</head>
+<body>
+<h1>Create Account</h1>
+<form id="signupForm" method="post">
+    <input type="hidden" name="action" value="signup">
 
-            <label>Password</label>
-            <input type="password" name="password" required placeholder="Enter your password"><br><br>
+    <div>
+        <label>Username:</label>
+        <input type="text" name="username" required>
+    </div>
 
-            <label>Confirm Password</label>
-            <input type="password" name="confirm_password" required placeholder="Confirm your password"><br><br>
+    <div>
+        <label>Password:</label>
+        <input type="password" name="password" required>
+    </div>
 
-            <label>PAN number</label>
-            <input type="text" name="pan_number" required placeholder="Enter your pan number"><br><br>
+    <div>
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" required>
+    </div>
 
-            <label>Demat account password</label>
-            <input type="password" name="demat_password" required placeholder="Enter your demat password"><br><br>
+    <div>
+        <label>PAN Number:</label>
+        <input type="text" name="pan_number" required>
+    </div>
 
-            <label>Are you an Promoter?</label>
-            <input type="radio" name="is_promoter" value="yes" required> Yes
-            <input type="radio" name="is_promoter" value="no"> No <br><br>
+    <div>
+        <label>Demat Password:</label>
+        <input type="password" name="demat_password" required>
+    </div>
 
-            <button type="submit">Sign up</button><br><br>
-        </form>
-        <p>
-            <a href="login.html">Already have an account?</a>
-        </p>
-    </body>
+    <div>
+        <label>Are you a Promoter?</label>
+        <input type="radio" name="is_promoter" value="yes" required> Yes
+        <input type="radio" name="is_promoter" value="no"> No
+    </div>
+
+    <button type="submit">Sign Up</button>
+    </form>
+
+    <p><a href="/MyServletApp_war_exploded/auth/login.html">Already have an account? Login</a></p>
+    <p id="message"></p>
+
+    <script src="/MyServletApp_war_exploded/js/auth.js"></script>
+</body>
 </html>

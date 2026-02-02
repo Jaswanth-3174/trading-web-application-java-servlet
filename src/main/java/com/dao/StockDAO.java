@@ -10,31 +10,34 @@ public class StockDAO {
 
     private static String tableName = "stocks";
 
-    public Stock findById(int stockId) throws SQLException {
+    public Stock findById(int stockId) {
         Condition c = new Condition();
         c.add("stock_id", stockId);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToStock(rows.get(0)) : null;
     }
 
-    public Stock findByName(String stockName) throws SQLException {
+    public Stock findByName(String stockName){
         Condition c = new Condition();
         c.add("stock_name", stockName);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, c);
         return !rows.isEmpty() ? mapToStock(rows.get(0)) : null;
     }
 
-    public static int getStockIdByName(String stockName) throws SQLException {
+    public static int getStockIdByName(String stockName) {
         Condition c = new Condition();
         c.add("stock_name", stockName);
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, new String[]{"stock_id"}, c);
         return !rows.isEmpty() ? ((Number) rows.get(0).get("stock_id")).intValue() : -1;
     }
 
-    public static String getStockNameById(int stockId) throws SQLException {
+    public static String getStockNameById(int stockId){
         Condition c = new Condition();
         c.add("stock_id", stockId);
-        ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, new String[]{"stock_id"}, c);
+
+        ArrayList<HashMap<String, Object>> rows =
+                SelectOperation.select(tableName, new String[]{"stock_name"}, c);
+
         return !rows.isEmpty() ? (String) rows.get(0).get("stock_name") : null;
     }
 
@@ -52,7 +55,7 @@ public class StockDAO {
         return affected > 0;
     }
 
-    public List<Stock> listAllStocks() throws SQLException {
+    public List<Stock> listAllStocks(){
         ArrayList<HashMap<String, Object>> rows = SelectOperation.select(tableName, null);
         List<Stock> stocks = new ArrayList<>();
         for (HashMap<String, Object> row : rows) {

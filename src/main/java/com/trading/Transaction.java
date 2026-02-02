@@ -16,9 +16,9 @@ public class Transaction {
     private double total;
     private String userName;
 
-    public Transaction() throws SQLException {}
+    public Transaction() {}
 
-    public String getUserName(int id) throws SQLException{
+    public String getUserName(int id) {
         return UserDAO.findUsernameById(id);
     }
 

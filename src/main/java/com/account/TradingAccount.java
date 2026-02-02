@@ -23,6 +23,9 @@ public class TradingAccount {
     public double getAvailableBalance() {
         return balance;
     }
+    public void setAvailableBalance(double amount){
+        this.balance += amount;
+    }
 
     public double getTotalBalance() {
         return balance + reservedBalance;

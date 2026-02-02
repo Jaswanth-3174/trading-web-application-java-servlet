@@ -13,11 +13,10 @@ public class Order {
     private double price;
     private boolean isBuy;
     private double total;
+    private String stockName;
 
-    public Order() throws SQLException {
+    public Order() {
     }
-
-    String stockName = getStockName();
 
     public Order(int userId, int stockId, int quantity, double price, boolean isBuy) throws SQLException {
         this.userId = userId;
@@ -74,7 +73,7 @@ public class Order {
         return this.total = getPrice() * getQuantity();
     }
 
-    public String getStockName() throws SQLException{
+    public String getStockName(int stockId){
         return StockDAO.getStockNameById(stockId);
     }
 

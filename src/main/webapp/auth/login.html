@@ -1,26 +1,29 @@
+<!DOCTYPE html>
 <html>
-    <head>
-        <title>Login</title>
-    </head>
-    <body>
-        <h1>Welcome back!</h1>
-        <form id="loginForm">
-            <input type="hidden" name="action" value="login">
+<head>
+    <title>Login</title>
+</head>
+<body>
+    <h1>Login</h1>
+    <form id="loginForm" method="post">
+        <input type="hidden" name="action" value="login">
 
-            <label>Name</label>
-            <input type="text" name="username" required placeholder="Enter your username"><br><br>
+        <div>
+            <label>Username:</label>
+            <input type="text" name="username" required>
+        </div>
 
-            <label>Password</label>
-            <input type="password" name="password" required placeholder="Enter your password"><br><br>
+        <div>
+            <label>Password:</label>
+            <input type="password" name="password" required>
+        </div>
 
-            <button type="submit">Login</button>
-        </form>
+        <button type="submit">Login</button>
+    </form>
 
-        <p>
-            <a href="signup.html">New user?</a>
-        </p><br>
+    <p><a href="/MyServletApp_war_exploded/auth/signup.html">New user? Create an account</a></p>
+    <p id="message"></p>
 
-        <p id="message" class="message"></p>
-        <script src="../js/auth.js"></script>
-    </body>
+    <script src="/MyServletApp_war_exploded/js/auth.js"></script>
+</body>
 </html>

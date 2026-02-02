@@ -28,7 +28,7 @@ public class MarketPlace {
         this.dematAccountDAO = new DematAccountDAO();
     }
 
-    public Order placeBuyOrder(int userId, String stockName, int quantity, double price) throws SQLException {
+    public Order placeBuyOrder(int userId, String stockName, int quantity, double price){
         Stock stock = stockDAO.findByName(stockName);
         if (stock == null) {
             System.out.println("Stock not found: " + stockName);
@@ -61,11 +61,15 @@ public class MarketPlace {
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
-    public Order placeSellOrder(int userId, String stockName, int quantity, double price) throws SQLException {
+    public Order placeSellOrder(int userId, String stockName, int quantity, double price){
         Stock stock = stockDAO.findByName(stockName);
         if (stock == null) {
             System.out.println("Stock not found: " + stockName);
@@ -106,11 +110,15 @@ public class MarketPlace {
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
-    void autoMatchBuy(Order buyOrder) throws SQLException {
+    void autoMatchBuy(Order buyOrder){
 
         int stockId = buyOrder.getStockId();
         double buyPrice = buyOrder.getPrice();
@@ -145,7 +153,7 @@ public class MarketPlace {
         }
     }
 
-    void autoMatchSell(Order sellOrder) throws SQLException {
+    void autoMatchSell(Order sellOrder) {
         int stockId = sellOrder.getStockId();
         double sellPrice = sellOrder.getPrice();
         double lastPrice = 0;
@@ -291,7 +299,7 @@ public class MarketPlace {
 //        }
 //    }
 
-    private boolean executeTrade(Order buy, Order sell) throws SQLException {
+    private boolean executeTrade(Order buy, Order sell) {
         try {
             DatabaseConfig.beginTransaction();
 
@@ -333,25 +341,29 @@ public class MarketPlace {
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
     private void printTradeDetails(int stockId, int qty, double price, double total, User buyer, User seller) {
-        System.out.println("\n+---------------------------------------+");
-        System.out.println("+           ORDER MATCHED               +");
-        System.out.println("+---------------------------------------+");
-        System.out.printf("+ Stock      : %-24d +%n", stockId);
-        System.out.printf("+ Quantity   : %-24d +%n", qty);
-        System.out.printf("+ Price      : Rs.%-22.2f+%n", price);
-        System.out.printf("+ Total      : Rs.%-22.2f+%n", total);
-        System.out.printf("+ Buyer      : %d (%s)%-10d+%n", buyer.getUserId(), buyer.getUserName());
-        System.out.printf("+ Seller     : %d (%s)%-10d+%n", seller.getUserId(), seller.getUserName());
-        System.out.println("+---------------------------------------+\n");
+//        System.out.println("\n+---------------------------------------+");
+//        System.out.println("+           ORDER MATCHED               +");
+//        System.out.println("+---------------------------------------+");
+//        System.out.printf("+ Stock      : %-24d +%n", stockId);
+//        System.out.printf("+ Quantity   : %-24d +%n", qty);
+//        System.out.printf("+ Price      : Rs.%-22.2f+%n", price);
+//        System.out.printf("+ Total      : Rs.%-22.2f+%n", total);
+//        System.out.printf("+ Buyer      : %d (%s)%-10d+%n", buyer.getUserId(), buyer.getUserName());
+//        System.out.printf("+ Seller     : %d (%s)%-10d+%n", seller.getUserId(), seller.getUserName());
+//        System.out.println("+---------------------------------------+\n");
     }
 
     public boolean modifyOrder(int userId, int orderId, int newQuantity, double newPrice)
-            throws SQLException {
+            {
 
         try {
             DatabaseConfig.beginTransaction();
@@ -396,16 +408,18 @@ public class MarketPlace {
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
 
-        // 🔥 CRITICAL FIX: re-fetch updated order
         Order updatedOrder = orderDAO.findById(orderId);
         if (updatedOrder == null || updatedOrder.getQuantity() <= 0) {
             return true;
         }
 
-        // 🔥 side-specific matching
         if (updatedOrder.isBuy()) {
             autoMatchBuy(updatedOrder);
         } else {
@@ -417,7 +431,7 @@ public class MarketPlace {
 
 
 
-    public boolean cancelOrder(int userId, int orderId) throws SQLException {
+    public boolean cancelOrder(int userId, int orderId){
         try {
             DatabaseConfig.beginTransaction();
             Order order = orderDAO.findById(orderId);
@@ -458,7 +472,11 @@ public class MarketPlace {
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
-            throw e;
+            try {
+                throw e;
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
         }
     }
 
@@ -527,10 +545,11 @@ public class MarketPlace {
                     "ID", "Type", "Stock", "Qty","Price");
             System.out.println("+-----------------------------------------------------------------------+");
             for (Order o : orders) {
+                int stockId = o.getStockId();
                 System.out.printf("+ %-6d %-6s %-8s %-6d Rs.%-9.2f+%n",
                         o.getOrderId(),
                         o.isBuy() ? "BUY" : "SELL",
-                        o.getStockName(),
+                        o.getStockName(stockId),
                         o.getQuantity(),
                         o.getPrice()
                 );

@@ -58,7 +58,7 @@ public class DematAccountDAO {
         return accounts;
     }
 
-    public boolean authenticate(String panNumber, String password) throws SQLException {
+    public boolean authenticate(String panNumber, String password) {
         Condition c = new Condition();
         c.add("pan_number", panNumber);
         c.add("password", password);
