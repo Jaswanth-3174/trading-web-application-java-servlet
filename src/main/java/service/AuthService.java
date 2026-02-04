@@ -58,5 +58,4 @@ public class AuthService {
         tradingAccountDAO.createTradingAccount(user.getUserId(), initialBalance);
         return "Success";
     }
-
 }

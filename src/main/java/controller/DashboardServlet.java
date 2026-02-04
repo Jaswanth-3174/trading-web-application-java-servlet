@@ -3,6 +3,7 @@ package controller;
 import com.account.TradingAccount;
 import com.dao.*;
 import com.market.MarketPlace;
+import com.market.TradeResult;
 import com.trading.*;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -44,18 +45,21 @@ public class DashboardServlet extends HttpServlet {
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException {
 
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.setHeader("Pragma", "no-cache");
-        res.setDateHeader("Expires", 0);
-
         HttpSession session = req.getSession(false);
 
-        if (session == null) {
+        if (session == null || session.getAttribute("username") == null) {
             res.setStatus(401);
             return;
         }
 
         String action = req.getParameter("action");
+
+        if (action == null) {
+            res.setContentType("text/plain");
+            res.getWriter().print(session.getAttribute("username"));
+            return;
+        }
+
         String username = session.getAttribute("username").toString();
 
         if("balance".equals(action)) {
@@ -124,10 +128,54 @@ public class DashboardServlet extends HttpServlet {
 
             User user = userDAO.findByUsername(username);
 
-            marketPlace.placeBuyOrder(user.getUserId(), stockName, quantity, price);
+            Order order = marketPlace.placeBuyOrder(user.getUserId(), stockName, quantity, price);
 
-            res.getWriter().print("BUY order placed successfully!");
+            res.setContentType("application/json");
+
+            if(order == null){
+                res.getWriter().print("{\"success\":false}");
+                return;
+            }
+
+            int remaining = order.getQuantity();
+            TradeResult t = TradeResult.lastTrade;
+
+            String status;
+
+            if(t == null){
+                status = "WAITING";
+            }
+            else if(remaining == 0){
+                status = "FULLY_SOLD";
+            }
+            else{
+                status = "PARTIALLY_SOLD";
+            }
+
+            String json = "{"
+                    + "\"success\":true,"
+                    + "\"orderId\":"+order.getOrderId()+","
+                    + "\"status\":\""+status+"\","
+                    + "\"remaining\":"+remaining;
+
+            if(t != null){
+                json += ",\"trade\":{"
+                        + "\"buyer\":\""+t.buyer+"\","
+                        + "\"seller\":\""+t.seller+"\","
+                        + "\"stock\":\""+t.stock+"\","
+                        + "\"quantity\":"+t.quantity+","
+                        + "\"price\":"+t.price+","
+                        + "\"total\":"+t.total
+                        + "}";
+            }
+
+            json += "}";
+
+            res.getWriter().print(json);
+
+            TradeResult.lastTrade = null;
         }
+
         if("sellOrder".equals(action)){
             String stockName = req.getParameter("stockName").toUpperCase();
             int quantity = Integer.parseInt(req.getParameter("quantity"));
@@ -300,7 +348,7 @@ public class DashboardServlet extends HttpServlet {
                     table += "<td>" + t.getUserName(t.getSellerId()) + "</td>";
                     table += "<td>" + t.getQuantity() + "</td>";
                     table += "<td>" + t.getPrice() + "</td>";
-                    table += "<td>" + t.getTotal() + "</td>";
+                    table += "<td>" + (t.getQuantity()*t.getPrice()) + "</td>";
                     table += "</tr>";
                 }
                 table += "</table>";
@@ -391,16 +439,15 @@ public class DashboardServlet extends HttpServlet {
         }
     }
 
-    protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException{
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        res.setHeader("Pragma", "no-cache");
-        res.setDateHeader("Expires", 0);
-
-        HttpSession session = req.getSession();
-        if(session == null) return;
-
-        String action = req.getParameter("action");
-        String username = session.getAttribute("username").toString();
-
-    }
+//    protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException{
+//        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+//        res.setHeader("Pragma", "no-cache");
+//        res.setDateHeader("Expires", 0);
+//
+//        HttpSession session = req.getSession();
+//        if(session == null) return;
+//
+//        String action = req.getParameter("action");
+//        String username = session.getAttribute("username").toString();
+//    }
 }

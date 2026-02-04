@@ -56,8 +56,7 @@ public class MarketPlace {
             System.out.println("BUY order placed: #" + order.getOrderId());
 
             autoMatchBuy(order);
-
-            return orderDAO.findById(order.getOrderId());
+            return order;
 
         } catch (SQLException e) {
             DatabaseConfig.rollback();
@@ -337,6 +336,12 @@ public class MarketPlace {
             DatabaseConfig.commit();
 
             printTradeDetails(buy.getOrderId(), quantity, tradePrice, total, buyer, seller);
+
+            TradeResult.lastTrade = new TradeResult(buyer.getUserName(), seller.getUserName(),
+                    StockDAO.getStockNameById(buy.getStockId()), quantity,
+                    tradePrice, total
+            );
+
             return true;
 
         } catch (SQLException e) {
