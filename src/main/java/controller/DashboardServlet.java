@@ -177,16 +177,65 @@ public class DashboardServlet extends HttpServlet {
         }
 
         if("sellOrder".equals(action)){
+
             String stockName = req.getParameter("stockName").toUpperCase();
             int quantity = Integer.parseInt(req.getParameter("quantity"));
             double price = Double.parseDouble(req.getParameter("price"));
 
             User user = userDAO.findByUsername(username);
 
-            marketPlace.placeSellOrder(user.getUserId(), stockName, quantity, price);
+            Order order = marketPlace.placeSellOrder(
+                    user.getUserId(), stockName, quantity, price
+            );
 
-            res.getWriter().print("SELL order placed successfully!");
+            res.setContentType("application/json");
+
+            if(order == null){
+                res.getWriter().print("""
+        {"Failed to place sell order":"Not enough stocks available"}
+        """);
+                return;
+            }
+
+            int remaining = order.getQuantity();
+            TradeResult t = TradeResult.lastTrade;
+
+            String status;
+
+            if(t == null){
+                status = "WAITING";
+            }
+            else if(remaining == 0){
+                status = "FULLY_SOLD";
+            }
+            else{
+                status = "PARTIALLY_SOLD";
+            }
+
+            String json = "{"
+                    + "\"success\":true,"
+                    + "\"orderId\":"+order.getOrderId()+","
+                    + "\"status\":\""+status+"\","
+                    + "\"remaining\":"+remaining;
+
+            if(t != null){
+                json += ",\"trade\":{"
+                        + "\"buyer\":\""+t.buyer+"\","
+                        + "\"seller\":\""+t.seller+"\","
+                        + "\"stock\":\""+t.stock+"\","
+                        + "\"quantity\":"+t.quantity+","
+                        + "\"price\":"+t.price+","
+                        + "\"total\":"+t.total
+                        + "}";
+            }
+
+            json += "}";
+
+            res.getWriter().print(json);
+
+            TradeResult.lastTrade = null;
         }
+
         if("viewStocks".equals(action)){
             List<Stock> stocks = stockDAO.listAllStocks();
             String table = "<table border='1' cellpadding='8'>" +
@@ -197,34 +246,31 @@ public class DashboardServlet extends HttpServlet {
             table += "</table>";
             res.getWriter().print(table);
         }
-        if("viewMyOrders".equals(action)) {
-            res.getWriter().print("<h3>Your ORDERS</h3>");
+
+        if("viewMyOrders".equals(action)){
+
             User user = userDAO.findByUsername(username);
             List<Order> orders = orderDAO.findByUserId(user.getUserId());
-            if (orders.isEmpty()) {
-                res.getWriter().print("No orders found");
-            } else {
-                String table = "<table border='1' cellpadding='8'<tr>" +
-                        "<th>Order ID</th>" +
-                        "<th>Stock Name</th>" +
-                        "<th>BUY/SELL</th>" +
-                        "<th>Price</th>" +
-                        "<th>Quantity</th>" +
-                        "<th>Total</th>"+
-                        "</tr>";
-                for (Order o : orders) {
-                    int stockId = o.getStockId();
-                    table += "<tr>";
-                    table += "<td>" + o.getOrderId() + "</td>";
-                    table += "<td>" + StockDAO.getStockNameById(stockId) + "</td>";
-                    table += "<td>" + (o.isBuy() ? "BUY" : "SELL") + "</td>";
-                    table += "<td>" + o.getPrice() + "</td>";
-                    table += "<td>" + o.getQuantity() + "</td>";
-                    table += "<td>" + o.getTotal() + "</td>";
-                    table += "</tr>";
-                }
-                res.getWriter().print(table);
+
+            res.setContentType("application/json");
+
+            StringBuilder json = new StringBuilder("[");
+            for(int i=0;i<orders.size();i++){
+                Order o = orders.get(i);
+
+                json.append("{")
+                        .append("\"id\":").append(o.getOrderId()).append(",")
+                        .append("\"stock\":\"").append(StockDAO.getStockNameById(o.getStockId())).append("\",")
+                        .append("\"qty\":").append(o.getQuantity()).append(",")
+                        .append("\"price\":").append(o.getPrice()).append(",")
+                        .append("\"type\":\"").append(o.isBuy()?"BUY":"SELL").append("\"")
+                        .append("}");
+
+                if(i < orders.size()-1) json.append(",");
             }
+            json.append("]");
+
+            res.getWriter().print(json.toString());
         }
 
         if("viewAllStockOrders".equals(action)){
@@ -410,33 +456,98 @@ public class DashboardServlet extends HttpServlet {
         }
 
         if("cancelOrder".equals(action)){
-            int orderId = Integer.parseInt(req.getParameter("orderId"));
-            User user = userDAO.findByUsername(username);
-            if(marketPlace.cancelOrder(user.getUserId(), orderId)){
-                res.getWriter().print("Order cancelled successfully!");
-            }else{
-                res.getWriter().print("This is not your order!");
+
+            res.setContentType("application/json");
+
+            try{
+                int orderId = Integer.parseInt(req.getParameter("orderId"));
+
+                User user = userDAO.findByUsername(username);
+
+                if(user == null){
+                    res.getWriter().print("{\"success\":false,\"error\":\"User not found\"}");
+                    return;
+                }
+
+                boolean ok = marketPlace.cancelOrder(user.getUserId(), orderId);
+
+                if(ok){
+                    res.getWriter().print("{\"success\":true}");
+                }else{
+                    res.getWriter().print("{\"success\":false,\"error\":\"Cannot cancel this order\"}");
+                }
+
+            }catch(Exception e){
+                res.getWriter().print(
+                        "{\"success\":false,\"error\":\"Server error while cancelling\"}"
+                );
             }
         }
+
+
 
         if("modifyOrder".equals(action)){
-            int orderId = Integer.parseInt(req.getParameter("orderId"));
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
-            double price = Integer.parseInt(req.getParameter("price"));
 
-            if(orderId <=0 || quantity <= 0 || price <= 0 ){
-                res.getWriter().print("Invalid orderId or Quantity or Price");
-                return;
-            }
+            res.setContentType("application/json");
 
-            User user = userDAO.findByUsername(username);
-            boolean modified = marketPlace.modifyOrder(user.getUserId(), orderId, quantity, price);
-            if(modified){
-                res.getWriter().print("Order modified successfully!");
-            } else {
-                res.getWriter().print("Unable to modify order!");
+            try{
+                int orderId = Integer.parseInt(req.getParameter("orderId"));
+                int qty = Integer.parseInt(req.getParameter("quantity"));
+                double price = Double.parseDouble(req.getParameter("price"));
+
+                User user = userDAO.findByUsername(username);
+
+                if(user == null){
+                    res.getWriter().print("{\"success\":false,\"error\":\"User not found\"}");
+                    return;
+                }
+
+                boolean ok = marketPlace.modifyOrder(
+                        user.getUserId(), orderId, qty, price
+                );
+
+                if(ok){
+                    res.getWriter().print("{\"success\":true}");
+                }else{
+                    res.getWriter().print(
+                            "{\"success\":false,\"error\":\"Insufficient balance or stock\"}"
+                    );
+                }
+
+            }catch(Exception e){
+                res.getWriter().print(
+                        "{\"success\":false,\"error\":\"Invalid input or server error\"}"
+                );
             }
         }
+
+
+
+        // for sell order (drop down menu display)
+        if("myStocks".equals(action)){
+            User user = userDAO.findByUsername(username);
+
+            List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
+
+            StringBuilder json = new StringBuilder("[");
+
+            for(int i=0;i<holdings.size();i++){
+                StockHolding h = holdings.get(i);
+
+                json.append("{")
+                        .append("\"id\":").append(h.getStockId()).append(",")
+                        .append("\"name\":\"").append(StockDAO.getStockNameById(h.getStockId())).append("\",")
+                        .append("\"qty\":").append(h.getAvailableQuantity())
+                        .append("}");
+
+                if(i < holdings.size()-1) json.append(",");
+            }
+
+            json.append("]");
+            res.setContentType("application/json");
+            res.getWriter().print(json.toString());
+        }
+
     }
 
 //    protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException{

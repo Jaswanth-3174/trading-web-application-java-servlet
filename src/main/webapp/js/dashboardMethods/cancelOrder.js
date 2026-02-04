@@ -1,9 +1,25 @@
-function cancelOrder(){
-    document.getElementById("content").innerHTML = `
-        <h3> CANCEL ORDER </h3>
-        <input type="number" id="id" placeholder="Enter the Order ID to cancel">
-        <button onclick="cancelId()">Cancel Order</button>
-    `;
+function cancelOrder(id){
+
+    if(!confirm("Cancel order #" + id + "?")) return;
+
+    fetch("/MyServletApp_war_exploded/dashboard?action=cancelOrder&orderId=" + id,{
+        method:"POST"
+    })
+        .then(res => res.json())
+        .then(data => {
+
+            if(data.success){
+
+                document.getElementById("content").innerHTML =
+                    "<h3 style='color:green'>Order cancelled successfully!</h3>";
+
+                setTimeout(viewMyOrders, 1000);
+
+            }else{
+                document.getElementById("content").innerHTML =
+                    "<h3 style='color:red'>" + data.error + "</h3>";
+            }
+        });
 }
 
 function cancelId(){

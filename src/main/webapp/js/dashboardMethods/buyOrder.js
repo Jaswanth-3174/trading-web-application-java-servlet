@@ -21,6 +21,11 @@ function buy(){
     const quantity = document.getElementById("quantity").value;
     const price = document.getElementById("price").value;
 
+    if(!stockName){
+        alert("Select a stock first");
+        return;
+    }
+
     fetch("/MyServletApp_war_exploded/dashboard?action=buyOrder" +
         "&stockName=" + encodeURIComponent(stockName) +
         "&quantity=" + quantity +

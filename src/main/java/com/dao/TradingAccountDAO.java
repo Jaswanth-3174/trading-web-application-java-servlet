@@ -2,6 +2,7 @@ package com.dao;
 
 import com.dbOperations.*;
 import com.account.TradingAccount;
+import com.trading.StockHolding;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -93,5 +94,29 @@ public class TradingAccountDAO {
         account.setReservedBalance(((Number) row.get("reserved_balance")).doubleValue());
         return account;
     }
+
+    public List<StockHolding> findByDematId(int dematId){
+
+        Condition c = new Condition();
+        c.add("demat_id", dematId);
+
+        ArrayList<HashMap<String,Object>> rows =
+                SelectOperation.select("stock_holdings", c);
+
+        List<StockHolding> list = new ArrayList<>();
+
+        for(HashMap<String,Object> r : rows){
+            StockHolding h = new StockHolding();
+            h.setStockHoldingId(((Number)r.get("stock_holding_id")).intValue());
+            h.setDematId(((Number)r.get("demat_id")).intValue());
+            h.setStockId(((Number)r.get("stock_id")).intValue());
+            h.setTotalQuantity(((Number)r.get("total_quantity")).intValue());
+            h.setReservedQuantity(((Number)r.get("reserved_quantity")).intValue());
+
+            list.add(h);
+        }
+        return list;
+    }
+
 
 }
