@@ -14,6 +14,8 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.util.List;
 
+import org.json.JSONObject;
+
 public class DashboardServlet extends HttpServlet {
 
     OrderDAO orderDAO = new OrderDAO();
@@ -46,6 +48,7 @@ public class DashboardServlet extends HttpServlet {
             throws IOException {
 
         HttpSession session = req.getSession(false);
+        System.out.println("SESSION CREATED: " + session.getId());
 
         if (session == null || session.getAttribute("username") == null) {
             res.setStatus(401);
@@ -62,38 +65,25 @@ public class DashboardServlet extends HttpServlet {
 
         String username = session.getAttribute("username").toString();
 
-        if("balance".equals(action)) {
+//        if("balance".equals(action)) {
+//            res.setContentType("application/json");
+//
 //            User user = userDAO.findByUsername(username);
-//            TradingAccount tradingAccount = tradingAccountDAO.findByUserId(user.getUserId());
+//            if (user == null) {
+//                JSONObject err = new JSONObject();
+//                err.put("error", "Session expired");
+//                res.getWriter().print(err.toString());
+//                return;
+//            }
 //
-//            double totalBalance = tradingAccount.getTotalBalance();
-//            double availableBalance = tradingAccount.getAvailableBalance();
-//            double reservedBalance = tradingAccount.getReservedBalance();
+//            TradingAccount acc = tradingAccountDAO.findByUserId(user.getUserId());
 //
-//            res.getWriter().print("<br> Total Balance : " + totalBalance);
-//            res.getWriter().print("<br> Available Balance : " + availableBalance);
-//            res.getWriter().print("<br> Reserved Balance : " + reservedBalance);
-
-            res.setContentType("application/json");
-            User user = userDAO.findByUsername(username);
-            if (user == null) {
-                res.getWriter().print("{\"error\":\"Session expired\"}");
-                return;
-            }
-
-            TradingAccount tradingAccount = tradingAccountDAO.findByUserId(user.getUserId());
-
-            double total = tradingAccount.getTotalBalance();
-            double available = tradingAccount.getAvailableBalance();
-            double reserved = tradingAccount.getReservedBalance();
-
-            String json = "{ " +
-                    "\"total\": " + total + "," +
-                    "\"available\": " + available + "," +
-                    "\"reserved\": " + reserved + " }";
-
-            res.getWriter().print(json);
-        }
+//            JSONObject json = new JSONObject();
+//            json.put("total", acc.getTotalBalance());
+//            json.put("available", acc.getAvailableBalance());
+//            json.put("reserved", acc.getReservedBalance());
+//            res.getWriter().print(json.toString());
+//        }
 
         if("addMoney".equals(action)){
             double amount = Double.parseDouble(req.getParameter("amount"));

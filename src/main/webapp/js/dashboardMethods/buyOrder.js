@@ -16,12 +16,12 @@ function buyOrder(){
     `
 }
 
-function buy(){
+function buy() {
     const stockName = document.getElementById("stockName").value;
     const quantity = document.getElementById("quantity").value;
     const price = document.getElementById("price").value;
 
-    if(!stockName){
+    if (!stockName) {
         alert("Select a stock first");
         return;
     }
@@ -34,31 +34,31 @@ function buy(){
     })
         .then(res => res.json())
         .then(data => {
-            if(!data.success){
+            if (!data.success) {
                 content.innerHTML = "Order failed";
                 return;
             }
 
             let html = `
-                <h3>Order Result</h3>
-                <p>Order ID: ${data.orderId}</p>
+                    <h3>Order Result</h3>
+                    <p>Order ID: ${data.orderId}</p>
                 `;
 
-            if(data.trade){
+            if (data.trade) {
                 html += `
                     <h4>Trade Executed</h4>
                     <p>Sold Quantity: ${data.trade.quantity}</p>
                     <p>Buyer: ${data.trade.buyer}</p>
-                    <p>Seller: ${data.trade.seller}</p>
+                    <p>Seller: ${data.trade.seller}</p>    
                     <p>Stock Name: ${data.trade.stock}</p>
                     <p>Price: Rs.${data.trade.price}</p>
                     <p>Total: Rs.${data.trade.total}</p>
                 `;
-            }else{
+            } else {
                 html += `
                     <p>Status: ${data.status}</p>
                     <p>Remaining Quantity: ${data.remaining}</p>
-                    `;
+                `;
             }
             content.innerHTML = html;
         });

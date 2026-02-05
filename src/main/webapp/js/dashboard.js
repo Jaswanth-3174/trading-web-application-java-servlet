@@ -31,7 +31,7 @@ function showAccount(){
     document.getElementById("content").innerHTML = "<h3>Select an Account option</h3>";
 
     document.getElementById("subnav").innerHTML = `
-        <button type="button" onclick="viewBalance()">Balance</button>
+        <button onclick="viewBalance()">View Balance</button>
         <button type="button" onclick="addBalance()">Add Money</button>
         <button type="button" onclick="viewPortfolio()">Portfolio</button>
         <button type="button" onclick="deleteMyAccount()">Delete</button>
