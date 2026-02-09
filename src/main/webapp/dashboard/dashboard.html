@@ -66,43 +66,54 @@
 
 <body>
 
-<div class="topbar">
-    <h2 id="name">Trading Dashboard</h2>
+    <div class="topbar">
+        <h2 id="name">Trading Dashboard</h2>
 
-    <form id="logoutForm">
-        <input type="hidden" name="action" value="logout">
-        <button class="logout">Logout</button>
-    </form>
-</div>
+        <form id="logoutForm">
+            <input type="hidden" name="action" value="logout">
+            <button class="logout">Logout</button>
+        </form>
+    </div>
 
-<div class="nav">
-    <button onclick="showOrders()">Orders</button>
-    <button onclick="showMarket()">Market</button>
-    <button onclick="showAccount()">Account</button>
-    <button onclick="showReports()">Reports</button>
-</div>
+    <div class="nav">
+        <button onclick="showOrders()">Orders</button>
+        <button onclick="showMarket()">Market</button>
+        <button onclick="showAccount()">Account</button>
+        <button onclick="showReports()">Reports</button>
+    </div>
 
-<div id="subnav">
-    Select a category above
-</div>
+    <div id="subnav">
+        Select a category above
+    </div>
 
-<div id="content">
-    Select an action
-</div>
+    <div id="content">
+        Select an action
+    </div>
 
-<script src="/MyServletApp_war_exploded/js/dashboard.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboard.js"></script>
 
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/addBalance.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/buyOrder.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/cancelOrder.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/deleteMyAccount.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/modifyOrder.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/sellOrder.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/stockOrders.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/viewBalance.js"></script>
-<script src="/MyServletApp_war_exploded/js/dashboardMethods/viewStocks.js"></script>
+    <!--orders-->
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/buyOrder.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/sellOrder.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewMyOrders.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/modifyOrder.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/cancelOrder.js"></script>
 
-<script src="/MyServletApp_war_exploded/js/auth.js"></script>
+    <!--market-->
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewStocks.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/stockOrders.js"></script>
+
+    <!--accounts-->
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewBalance.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/addBalance.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewPortfolio.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/deleteMyAccount.js?v=2"></script>
+
+    <!--reports-->
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewAllTransactions.js"></script>
+    <script src="/MyServletApp_war_exploded/js/dashboardMethods/viewMyTransactions.js"></script>
+
+    <script src="/MyServletApp_war_exploded/js/auth.js"></script>
 
 </body>
 </html>

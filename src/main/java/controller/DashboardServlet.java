@@ -65,26 +65,6 @@ public class DashboardServlet extends HttpServlet {
 
         String username = session.getAttribute("username").toString();
 
-//        if("balance".equals(action)) {
-//            res.setContentType("application/json");
-//
-//            User user = userDAO.findByUsername(username);
-//            if (user == null) {
-//                JSONObject err = new JSONObject();
-//                err.put("error", "Session expired");
-//                res.getWriter().print(err.toString());
-//                return;
-//            }
-//
-//            TradingAccount acc = tradingAccountDAO.findByUserId(user.getUserId());
-//
-//            JSONObject json = new JSONObject();
-//            json.put("total", acc.getTotalBalance());
-//            json.put("available", acc.getAvailableBalance());
-//            json.put("reserved", acc.getReservedBalance());
-//            res.getWriter().print(json.toString());
-//        }
-
         if("addMoney".equals(action)){
             double amount = Double.parseDouble(req.getParameter("amount"));
             if (amount <= 0) {
@@ -226,225 +206,6 @@ public class DashboardServlet extends HttpServlet {
             TradeResult.lastTrade = null;
         }
 
-        if("viewStocks".equals(action)){
-            List<Stock> stocks = stockDAO.listAllStocks();
-            String table = "<table border='1' cellpadding='8'>" +
-                    " <tr><th>Stock Name</th></tr>";
-            for (Stock s : stocks) {
-                table += "<tr><td>" + s.getStockName() + "</td></tr>";
-            }
-            table += "</table>";
-            res.getWriter().print(table);
-        }
-
-        if("viewMyOrders".equals(action)){
-
-            User user = userDAO.findByUsername(username);
-            List<Order> orders = orderDAO.findByUserId(user.getUserId());
-
-            res.setContentType("application/json");
-
-            StringBuilder json = new StringBuilder("[");
-            for(int i=0;i<orders.size();i++){
-                Order o = orders.get(i);
-
-                json.append("{")
-                        .append("\"id\":").append(o.getOrderId()).append(",")
-                        .append("\"stock\":\"").append(StockDAO.getStockNameById(o.getStockId())).append("\",")
-                        .append("\"qty\":").append(o.getQuantity()).append(",")
-                        .append("\"price\":").append(o.getPrice()).append(",")
-                        .append("\"type\":\"").append(o.isBuy()?"BUY":"SELL").append("\"")
-                        .append("}");
-
-                if(i < orders.size()-1) json.append(",");
-            }
-            json.append("]");
-
-            res.getWriter().print(json.toString());
-        }
-
-        if("viewAllStockOrders".equals(action)){
-            String stockName = req.getParameter("stockName");
-            Stock stock = stockDAO.findByName(stockName);
-            if (stock == null) {
-                res.getWriter().print("Stock not found: " + stockName);
-                return;
-            }
-            int stockId = StockDAO.getStockIdByName(stockName);
-            List<Order> buyOrders = orderDAO.getBuyOrders(stockId);
-            List<Order> sellOrders = orderDAO.getSellOrders(stockId);
-
-            res.getWriter().print("<h2>ORDER BOOK: " + stockName + "</h2>");
-
-            // BUY ORDERS
-            res.getWriter().print("<h3>BUY ORDERS</h3>");
-            if (buyOrders.isEmpty()) {
-                res.getWriter().print("No active buy orders");
-            } else {
-                String table = "<table border='1' cellpadding='8'>" +
-                        "<tr>" +
-                        "<th>Order ID</th>" +
-                        "<th>User name</th>" +
-                        "<th>Quantity</th>" +
-                        "<th>Price</th>" +
-                        "</tr>";
-                for (Order o : buyOrders) {
-                    table += "<tr>";
-                    table += "<td>" + o.getOrderId() + "</td>";
-                    table += "<td>" + UserDAO.findUsernameById(o.getUserId()) + "</td>";
-                    table += "<td>" + o.getQuantity() + "</td>";
-                    table += "<td>" + o.getPrice() + "</td>";
-                    table += "</tr>";
-                }
-                table += "</table>";
-                res.getWriter().print(table);
-            }
-
-            res.getWriter().print("<hr>");
-
-            // SELL ORDERS
-            res.getWriter().print("<h3>SELL ORDERS</h3>");
-            if (sellOrders.isEmpty()) {
-                res.getWriter().print("No active sell orders");
-            } else {
-                String table = "<table border='1' cellpadding='8'>" +
-                        "<tr>" +
-                        "<th>Order ID</th>" +
-                        "<th>User name</th>" +
-                        "<th>Quantity</th>" +
-                        "<th>Price</th>" +
-                        "</tr>";
-                for (Order o : sellOrders) {
-                    table += "<tr>";
-                    table += "<td>" + o.getOrderId() + "</td>";
-                    table += "<td>" + UserDAO.findUsernameById(o.getUserId()) + "</td>";
-                    table += "<td>" + o.getQuantity() + "</td>";
-                    table += "<td>" + o.getPrice() + "</td>";
-                    table += "</tr>";
-                }
-                table += "</table>";
-                res.getWriter().print(table);
-            }
-        }
-
-        if("viewMyTransactions".equals(action)){
-            User user = userDAO.findByUsername(username);
-            List<Transaction> transactions = transactionDAO.findByUserId(user.getUserId());
-            res.getWriter().print("<h2>Your transactions</h2>");
-            if (transactions.isEmpty()) {
-                res.getWriter().print("No transactions found");
-            } else {
-                String table = "<table border='1' cellpadding='8'>" +
-                        "<tr>" +
-                        "<th>Transaction ID</th>" +
-                        "<th>Stock Name</th>" +
-                        "<th>Buyer Name</th>" +
-                        "<th>Seller Name</th>" +
-                        "<th>Quantity</th>" +
-                        "<th>Price</th>" +
-                        "<th>Total</th>" +
-                        "</tr>";
-                for (Transaction t : transactions) {
-                    table += "<tr>";
-                    table += "<td>" + t.getTransactionId() + "</td>";
-                    table += "<td>" + StockDAO.getStockNameById(t.getStockId()) + "</td>";
-                    table += "<td>" + t.getUserName(t.getBuyerId()) + "</td>";
-                    table += "<td>" + t.getUserName(t.getSellerId()) + "</td>";
-                    table += "<td>" + t.getQuantity() + "</td>";
-                    table += "<td>" + t.getPrice() + "</td>";
-                    table += "<td>" + (t.getQuantity()*t.getPrice()) + "</td>";
-                    table += "</tr>";
-                }
-                table += "</table>";
-                res.getWriter().print(table);
-            }
-        }
-
-        if("viewAllTransactions".equals(action)){
-            List<Transaction> transactions = transactionDAO.findAll();
-            res.getWriter().print("<h2>Your transactions</h2>");
-            if (transactions.isEmpty()) {
-                res.getWriter().print("No transactions found");
-            } else {
-                String table = "<table border='1' cellpadding='8'>" +
-                        "<tr>" +
-                        "<th>Transaction ID</th>" +
-                        "<th>Stock Name</th>" +
-                        "<th>Buyer Name</th>" +
-                        "<th>Seller Name</th>" +
-                        "<th>Quantity</th>" +
-                        "<th>Price</th>" +
-                        "<th>Total</th>" +
-                        "</tr>";
-                for (Transaction t : transactions) {
-                    table += "<tr>";
-                    table += "<td>" + t.getTransactionId() + "</td>";
-                    table += "<td>" + StockDAO.getStockNameById(t.getStockId()) + "</td>";
-                    table += "<td>" + t.getUserName(t.getBuyerId()) + "</td>";
-                    table += "<td>" + t.getUserName(t.getSellerId()) + "</td>";
-                    table += "<td>" + t.getQuantity() + "</td>";
-                    table += "<td>" + t.getPrice() + "</td>";
-                    table += "<td>" + (t.getQuantity()*t.getPrice()) + "</td>";
-                    table += "</tr>";
-                }
-                table += "</table>";
-                res.getWriter().print(table);
-            }
-        }
-
-        if("viewPortfolio".equals(action)){
-            User user = userDAO.findByUsername(username);
-            if (user == null) {
-                System.out.println("User not found!");
-                return;
-            }
-
-            List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
-
-            res.getWriter().print("<h3>STOCK PORTFOLIO</h3>");
-
-            if (holdings.isEmpty()) {
-                System.out.println("<h4>No stock holdings</h4>");
-            } else {
-                String table = "<table border='1' cellpadding='8'>" +
-                        "<tr>" +
-                        "<th>Stock Name</th>" +
-                        "<th>Total</th>" +
-                        "<th>Reserved</th>" +
-                        "<th>Available</th>" +
-                        "</tr>";
-                for (StockHolding h : holdings) {
-                    table += "<tr>";
-                    table += "<td>" + StockDAO.getStockNameById(h.getStockId()) + "</td>";
-                    table += "<td>" + h.getTotalQuantity() + "</td>";
-                    table += "<td>" + h.getReservedQuantity() + "</td>";
-                    table += "<td>" + h.getAvailableQuantity() + "</td>";
-                    table += "</tr>";
-                }
-                table += "</table>";
-                res.getWriter().print(table);
-            }
-        }
-
-        if("deleteMyAccount".equals(action)){
-            String data = req.getParameter("data").toUpperCase();
-
-            if (data == null || !data.equalsIgnoreCase("CONFIRM")) {
-                res.getWriter().print("Enter CONFIRM to delete account");
-                return;
-            }
-
-            User user = userDAO.findByUsername(username);
-            if(userDAO.deleteUser(user.getUserId())){
-                res.getWriter().print("<h3>UserId : "+ user.getUserId() + ", account deleted!<br></h3>");
-                res.getWriter().print("<h3>Demat account holdings are preserved!</h3>");
-                session.invalidate();
-            }
-            else{
-                res.getWriter().print("User account not deleted!");
-            }
-        }
-
         if("cancelOrder".equals(action)){
 
             res.setContentType("application/json");
@@ -473,8 +234,6 @@ public class DashboardServlet extends HttpServlet {
                 );
             }
         }
-
-
 
         if("modifyOrder".equals(action)){
 
@@ -511,8 +270,6 @@ public class DashboardServlet extends HttpServlet {
             }
         }
 
-
-
         // for sell order (drop down menu display)
         if("myStocks".equals(action)){
             User user = userDAO.findByUsername(username);
@@ -540,15 +297,4 @@ public class DashboardServlet extends HttpServlet {
 
     }
 
-//    protected void doPut(HttpServletRequest req, HttpServletResponse res) throws IOException{
-//        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-//        res.setHeader("Pragma", "no-cache");
-//        res.setDateHeader("Expires", 0);
-//
-//        HttpSession session = req.getSession();
-//        if(session == null) return;
-//
-//        String action = req.getParameter("action");
-//        String username = session.getAttribute("username").toString();
-//    }
 }

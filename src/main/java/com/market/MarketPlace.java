@@ -181,123 +181,6 @@ public class MarketPlace {
         }
     }
 
-//    private void autoMatch(int stockId) throws SQLException {
-//        while (true) {
-//
-//            List<Order> buyOrders = orderDAO.getBuyOrders(stockId);
-//            List<Order> sellOrders = orderDAO.getSellOrders(stockId);
-//
-//            // 🚫 No possible match
-//            if (buyOrders.isEmpty() || sellOrders.isEmpty()) {
-//                break;
-//            }
-//
-//            Order bestBuy = buyOrders.get(0);   // highest price
-//            Order bestSell = sellOrders.get(0); // lowest price
-//
-//            // 🚫 Price mismatch
-//            if (bestBuy.getPrice() < bestSell.getPrice()) {
-//                break;
-//            }
-//
-//            Order buy = null;
-//            Order sell = null;
-//
-//            if (bestBuy.getUserId() != bestSell.getUserId()) {
-//                buy = bestBuy;
-//                sell = bestSell;
-//            } else { // alternate sell
-//                for (Order s : sellOrders) {
-//                    if (s.getPrice() > bestBuy.getPrice()) break;
-//                    if (s.getUserId() != bestBuy.getUserId() && s.getQuantity() > 0) {
-//                        sell = s;
-//                        buy = bestBuy;
-//                        break;
-//                    }
-//                }
-//
-//                if (sell == null && !sellOrders.isEmpty()) {
-//                    Order lastSell = sellOrders.get(sellOrders.size() - 1);
-//                    if (lastSell.getPrice() <= bestBuy.getPrice()) {
-//                        List<Order> nextSellBatch = orderDAO.getNextSellOrders(stockId, lastSell.getPrice(), lastSell.getOrderId());
-//                        for (Order s : nextSellBatch) {
-//                            if (s.getPrice() > bestBuy.getPrice()) break;
-//                            if (s.getUserId() != bestBuy.getUserId() && s.getQuantity() > 0) {
-//                                sell = s;
-//                                buy = bestBuy;
-//                                break;
-//                            }
-//                        }
-//                    }
-//                }
-//
-//                if (sell == null) {
-//                    sell = orderDAO.findMatchingOrder(stockId, false, bestBuy.getUserId(), bestBuy.getPrice());
-//                    if (sell != null) {
-//                        buy = bestBuy;
-//                    }
-//                }
-//
-//                // no match -> Try alternate buy
-//                if (sell == null) {
-//                    for (Order b : buyOrders) {
-//                        if (b.getPrice() < bestSell.getPrice()) break;
-//                        if (b.getUserId() != bestSell.getUserId() && b.getQuantity() > 0) {
-//                            buy = b;
-//                            sell = bestSell;
-//                            break;
-//                        }
-//                    }
-//
-//                    // searching in next batches
-//                    if (buy == null && !buyOrders.isEmpty()) {
-//                        Order lastBuy = buyOrders.get(buyOrders.size() - 1);
-//                        if (lastBuy.getPrice() >= bestSell.getPrice()) {
-//                            List<Order> nextBuyBatch = orderDAO.getNextBuyOrders(stockId, lastBuy.getPrice(), lastBuy.getOrderId());
-//                            for (Order b : nextBuyBatch) {
-//                                if (b.getPrice() < bestSell.getPrice()) break;
-//                                if (b.getUserId() != bestSell.getUserId() && b.getQuantity() > 0) {
-//                                    buy = b;
-//                                    sell = bestSell;
-//                                    break;
-//                                }
-//                            }
-//                        }
-//                    }
-//
-//                    if (buy == null) {
-//                        buy = orderDAO.findMatchingOrder(stockId, true, bestSell.getUserId(), bestSell.getPrice());
-//                        if (buy != null) {
-//                            sell = bestSell;
-//                        }
-//                    }
-//                }
-//            }
-//
-//            // 🚫 No match
-//            if (buy == null || sell == null) {
-//                break;
-//            }
-//
-//            if (buy.getQuantity() <= 0 || sell.getQuantity() <= 0) {
-//                if (buy.getQuantity() <= 0) {
-//                    orderDAO.cancelOrder(buy.getOrderId());
-//                }
-//                if (sell.getQuantity() <= 0) {
-//                    orderDAO.cancelOrder(sell.getOrderId());
-//                }
-//                continue;
-//            }
-//
-//            boolean tradeDone = executeTrade(buy, sell);
-//
-//            // 🚫 Trade failed, this will stop the infinite loop
-//            if (!tradeDone) {
-//                break;
-//            }
-//        }
-//    }
-
     private boolean executeTrade(Order buy, Order sell) {
         try {
             DatabaseConfig.beginTransaction();
@@ -341,6 +224,8 @@ public class MarketPlace {
                     StockDAO.getStockNameById(buy.getStockId()), quantity,
                     tradePrice, total
             );
+            buy.setQuantity(newBuyQty);
+            sell.setQuantity(newSellQty);
 
             return true;
 
