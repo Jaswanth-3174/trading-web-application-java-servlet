@@ -79,11 +79,12 @@ public class ApiServlet extends HttpServlet {
             if(method.equals("POST")){
                 handleDeleteAccount(req, res);
             }
-        }else if(path.equals("/buyOrder")){
-            if(method.equals("POST")){
-                handleBuyOrder(req, res);
-            }
         }
+//        else if(path.equals("/buyOrder")){
+//            if(method.equals("POST")){
+//                handleBuyOrder(req, res);
+//            }
+//        }
         else if (path.equals("/myStocks") && method.equals("GET")) {
             handleMyStocks(req, res);
         }
@@ -201,81 +202,81 @@ public class ApiServlet extends HttpServlet {
         res.getWriter().print(response);
     }
 
-    private void handleBuyOrder(HttpServletRequest req, HttpServletResponse res) throws IOException {
-
-        res.setContentType("application/json");
-        JSONObject response = new JSONObject();
-
-        HttpSession session = req.getSession(false);
-        if (session == null) {
-            response.put("success", false);
-            response.put("message", "Session expired");
-            res.getWriter().print(response);
-            return;
-        }
-
-        String stockName = req.getParameter("stockName");
-        String qtyStr = req.getParameter("quantity");
-        String priceStr = req.getParameter("price");
-
-        if (stockName == null || qtyStr == null || priceStr == null) {
-            response.put("success", false);
-            response.put("message", "Missing parameters");
-            res.getWriter().print(response);
-            return;
-        }
-
-        int quantity = Integer.parseInt(qtyStr);
-        double price = Double.parseDouble(priceStr);
-
-        String username = session.getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
-
-        Order order = marketPlace.placeBuyOrder(
-                user.getUserId(),
-                stockName.toUpperCase(),
-                quantity,
-                price
-        );
-
-        if (order == null) {
-            response.put("success", false);
-            response.put("message", "Insufficient balance or invalid order");
-            res.getWriter().print(response);
-            return;
-        }
-
-        TradeResult t = TradeResult.lastTrade;
-        int remaining = order.getQuantity();
-
-        String status;
-        if (remaining == 0) {
-            status = "FILLED";
-        } else if (t != null) {
-            status = "PARTIALLY_FILLED";
-        } else {
-            status = "WAITING";
-        }
-
-        response.put("success", true);
-        response.put("orderId", order.getOrderId());
-        response.put("status", status);
-        response.put("remaining", remaining);
-
-        if (t != null) {
-            JSONObject trade = new JSONObject();
-            trade.put("buyer", t.buyer);
-            trade.put("seller", t.seller);
-            trade.put("stock", t.stock);
-            trade.put("quantity", t.quantity);
-            trade.put("price", t.price);
-            trade.put("total", t.total);
-            response.put("trade", trade);
-        }
-
-        TradeResult.lastTrade = null;
-        res.getWriter().print(response);
-    }
+//    private void handleBuyOrder(HttpServletRequest req, HttpServletResponse res) throws IOException {
+//
+//        res.setContentType("application/json");
+//        JSONObject response = new JSONObject();
+//
+//        HttpSession session = req.getSession(false);
+//        if (session == null) {
+//            response.put("success", false);
+//            response.put("message", "Session expired");
+//            res.getWriter().print(response);
+//            return;
+//        }
+//
+//        String stockName = req.getParameter("stockName");
+//        String qtyStr = req.getParameter("quantity");
+//        String priceStr = req.getParameter("price");
+//
+//        if (stockName == null || qtyStr == null || priceStr == null) {
+//            response.put("success", false);
+//            response.put("message", "Missing parameters");
+//            res.getWriter().print(response);
+//            return;
+//        }
+//
+//        int quantity = Integer.parseInt(qtyStr);
+//        double price = Double.parseDouble(priceStr);
+//
+//        String username = session.getAttribute("username").toString();
+//        User user = userDAO.findByUsername(username);
+//
+//        Order order = marketPlace.placeBuyOrder(
+//                user.getUserId(),
+//                stockName.toUpperCase(),
+//                quantity,
+//                price
+//        );
+//
+//        if (order == null) {
+//            response.put("success", false);
+//            response.put("message", "Insufficient balance or invalid order");
+//            res.getWriter().print(response);
+//            return;
+//        }
+//
+//        TradeResult t = TradeResult.lastTrade;
+//        int remaining = order.getQuantity();
+//
+//        String status;
+//        if (remaining == 0) {
+//            status = "FILLED";
+//        } else if (t != null) {
+//            status = "PARTIALLY_FILLED";
+//        } else {
+//            status = "WAITING";
+//        }
+//
+//        response.put("success", true);
+//        response.put("orderId", order.getOrderId());
+//        response.put("status", status);
+//        response.put("remaining", remaining);
+//
+//        if (t != null) {
+//            JSONObject trade = new JSONObject();
+//            trade.put("buyer", t.buyer);
+//            trade.put("seller", t.seller);
+//            trade.put("stock", t.stock);
+//            trade.put("quantity", t.quantity);
+//            trade.put("price", t.price);
+//            trade.put("total", t.total);
+//            response.put("trade", trade);
+//        }
+//
+//        TradeResult.lastTrade = null;
+//        res.getWriter().print(response);
+//    }
 
     private void handleDeleteAccount(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
