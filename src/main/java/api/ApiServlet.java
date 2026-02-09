@@ -201,14 +201,13 @@ public class ApiServlet extends HttpServlet {
         res.getWriter().print(response);
     }
 
-
     private void handleBuyOrder(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         res.setContentType("application/json");
         JSONObject response = new JSONObject();
 
         HttpSession session = req.getSession(false);
-        if(session == null){
+        if (session == null) {
             response.put("success", false);
             response.put("message", "Session expired");
             res.getWriter().print(response);
@@ -219,7 +218,7 @@ public class ApiServlet extends HttpServlet {
         String qtyStr = req.getParameter("quantity");
         String priceStr = req.getParameter("price");
 
-        if(stockName == null || qtyStr == null || priceStr == null){
+        if (stockName == null || qtyStr == null || priceStr == null) {
             response.put("success", false);
             response.put("message", "Missing parameters");
             res.getWriter().print(response);
@@ -232,38 +231,38 @@ public class ApiServlet extends HttpServlet {
         String username = session.getAttribute("username").toString();
         User user = userDAO.findByUsername(username);
 
-        Order order = marketPlace.placeBuyOrder(user.getUserId(),
-                stockName.toUpperCase(), quantity, price
+        Order order = marketPlace.placeBuyOrder(
+                user.getUserId(),
+                stockName.toUpperCase(),
+                quantity,
+                price
         );
 
-        if(order == null){
+        if (order == null) {
             response.put("success", false);
             response.put("message", "Insufficient balance or invalid order");
             res.getWriter().print(response);
             return;
         }
 
-        int remaining = order.getQuantity();
         TradeResult t = TradeResult.lastTrade;
-        int tradedQty = TradeResult.lastTrade.quantity;
-        order.setQuantity(order.getQuantity() - tradedQty);
+        int remaining = order.getQuantity();
 
         String status;
         if (remaining == 0) {
             status = "FILLED";
-        } else if (TradeResult.lastTrade != null) {
+        } else if (t != null) {
             status = "PARTIALLY_FILLED";
         } else {
             status = "WAITING";
         }
-
 
         response.put("success", true);
         response.put("orderId", order.getOrderId());
         response.put("status", status);
         response.put("remaining", remaining);
 
-        if(t != null){
+        if (t != null) {
             JSONObject trade = new JSONObject();
             trade.put("buyer", t.buyer);
             trade.put("seller", t.seller);
@@ -271,13 +270,12 @@ public class ApiServlet extends HttpServlet {
             trade.put("quantity", t.quantity);
             trade.put("price", t.price);
             trade.put("total", t.total);
-
             response.put("trade", trade);
         }
-        res.getWriter().print(response);
-        TradeResult.lastTrade = null;
-    }
 
+        TradeResult.lastTrade = null;
+        res.getWriter().print(response);
+    }
 
     private void handleDeleteAccount(HttpServletRequest req, HttpServletResponse res) throws IOException {
 

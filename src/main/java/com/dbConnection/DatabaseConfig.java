@@ -8,7 +8,6 @@ public class DatabaseConfig {
         static String password = "Root@123";
         static String query = "select * from users";
         static Connection con = null;
-
     static {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");

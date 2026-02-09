@@ -91,120 +91,65 @@ public class DashboardServlet extends HttpServlet {
             res.getWriter().print("<br> Available Balance : " + availableBalance);
             res.getWriter().print("<br> Reserved Balance : " + reservedBalance);
         }
-        if("buyOrder".equals(action)){
-            String stockName = req.getParameter("stockName").toUpperCase();
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
-            double price = Double.parseDouble(req.getParameter("price"));
-
-            User user = userDAO.findByUsername(username);
-
-            Order order = marketPlace.placeBuyOrder(user.getUserId(), stockName, quantity, price);
-
-            res.setContentType("application/json");
-
-            if(order == null){
-                res.getWriter().print("{\"success\":false}");
-                return;
-            }
-
-            int remaining = order.getQuantity();
-            TradeResult t = TradeResult.lastTrade;
-
-            String status;
-
-            if(t == null){
-                status = "WAITING";
-            }
-            else if(remaining == 0){
-                status = "FULLY_SOLD";
-            }
-            else{
-                status = "PARTIALLY_SOLD";
-            }
-
-            String json = "{"
-                    + "\"success\":true,"
-                    + "\"orderId\":"+order.getOrderId()+","
-                    + "\"status\":\""+status+"\","
-                    + "\"remaining\":"+remaining;
-
-            if(t != null){
-                json += ",\"trade\":{"
-                        + "\"buyer\":\""+t.buyer+"\","
-                        + "\"seller\":\""+t.seller+"\","
-                        + "\"stock\":\""+t.stock+"\","
-                        + "\"quantity\":"+t.quantity+","
-                        + "\"price\":"+t.price+","
-                        + "\"total\":"+t.total
-                        + "}";
-            }
-
-            json += "}";
-
-            res.getWriter().print(json);
-
-            TradeResult.lastTrade = null;
-        }
-
-        if("sellOrder".equals(action)){
-
-            String stockName = req.getParameter("stockName").toUpperCase();
-            int quantity = Integer.parseInt(req.getParameter("quantity"));
-            double price = Double.parseDouble(req.getParameter("price"));
-
-            User user = userDAO.findByUsername(username);
-
-            Order order = marketPlace.placeSellOrder(
-                    user.getUserId(), stockName, quantity, price
-            );
-
-            res.setContentType("application/json");
-
-            if(order == null){
-                res.getWriter().print("""
-        {"Failed to place sell order":"Not enough stocks available"}
-        """);
-                return;
-            }
-
-            int remaining = order.getQuantity();
-            TradeResult t = TradeResult.lastTrade;
-
-            String status;
-
-            if(t == null){
-                status = "WAITING";
-            }
-            else if(remaining == 0){
-                status = "FULLY_SOLD";
-            }
-            else{
-                status = "PARTIALLY_SOLD";
-            }
-
-            String json = "{"
-                    + "\"success\":true,"
-                    + "\"orderId\":"+order.getOrderId()+","
-                    + "\"status\":\""+status+"\","
-                    + "\"remaining\":"+remaining;
-
-            if(t != null){
-                json += ",\"trade\":{"
-                        + "\"buyer\":\""+t.buyer+"\","
-                        + "\"seller\":\""+t.seller+"\","
-                        + "\"stock\":\""+t.stock+"\","
-                        + "\"quantity\":"+t.quantity+","
-                        + "\"price\":"+t.price+","
-                        + "\"total\":"+t.total
-                        + "}";
-            }
-
-            json += "}";
-
-            res.getWriter().print(json);
-
-            TradeResult.lastTrade = null;
-        }
+//        if("sellOrder".equals(action)){
+//
+//            String stockName = req.getParameter("stockName").toUpperCase();
+//            int quantity = Integer.parseInt(req.getParameter("quantity"));
+//            double price = Double.parseDouble(req.getParameter("price"));
+//
+//            User user = userDAO.findByUsername(username);
+//
+//            Order order = marketPlace.placeSellOrder(
+//                    user.getUserId(), stockName, quantity, price
+//            );
+//
+//            res.setContentType("application/json");
+//
+//            if(order == null){
+//                res.getWriter().print("""
+//        {"Failed to place sell order":"Not enough stocks available"}
+//        """);
+//                return;
+//            }
+//
+//            int remaining = order.getQuantity();
+//            TradeResult t = TradeResult.lastTrade;
+//
+//            String status;
+//
+//            if(t == null){
+//                status = "WAITING";
+//            }
+//            else if(remaining == 0){
+//                status = "FULLY_SOLD";
+//            }
+//            else{
+//                status = "PARTIALLY_SOLD";
+//            }
+//
+//            String json = "{"
+//                    + "\"success\":true,"
+//                    + "\"orderId\":"+order.getOrderId()+","
+//                    + "\"status\":\""+status+"\","
+//                    + "\"remaining\":"+remaining;
+//
+//            if(t != null){
+//                json += ",\"trade\":{"
+//                        + "\"buyer\":\""+t.buyer+"\","
+//                        + "\"seller\":\""+t.seller+"\","
+//                        + "\"stock\":\""+t.stock+"\","
+//                        + "\"quantity\":"+t.quantity+","
+//                        + "\"price\":"+t.price+","
+//                        + "\"total\":"+t.total
+//                        + "}";
+//            }
+//
+//            json += "}";
+//
+//            res.getWriter().print(json);
+//
+//            TradeResult.lastTrade = null;
+//        }
 
         if("cancelOrder".equals(action)){
 
@@ -270,30 +215,30 @@ public class DashboardServlet extends HttpServlet {
             }
         }
 
-        // for sell order (drop down menu display)
-        if("myStocks".equals(action)){
-            User user = userDAO.findByUsername(username);
-
-            List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
-
-            StringBuilder json = new StringBuilder("[");
-
-            for(int i=0;i<holdings.size();i++){
-                StockHolding h = holdings.get(i);
-
-                json.append("{")
-                        .append("\"id\":").append(h.getStockId()).append(",")
-                        .append("\"name\":\"").append(StockDAO.getStockNameById(h.getStockId())).append("\",")
-                        .append("\"qty\":").append(h.getAvailableQuantity())
-                        .append("}");
-
-                if(i < holdings.size()-1) json.append(",");
-            }
-
-            json.append("]");
-            res.setContentType("application/json");
-            res.getWriter().print(json.toString());
-        }
+//        // for sell order (drop down menu display)
+//        if("myStocks".equals(action)){
+//            User user = userDAO.findByUsername(username);
+//
+//            List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
+//
+//            StringBuilder json = new StringBuilder("[");
+//
+//            for(int i=0;i<holdings.size();i++){
+//                StockHolding h = holdings.get(i);
+//
+//                json.append("{")
+//                        .append("\"id\":").append(h.getStockId()).append(",")
+//                        .append("\"name\":\"").append(StockDAO.getStockNameById(h.getStockId())).append("\",")
+//                        .append("\"qty\":").append(h.getAvailableQuantity())
+//                        .append("}");
+//
+//                if(i < holdings.size()-1) json.append(",");
+//            }
+//
+//            json.append("]");
+//            res.setContentType("application/json");
+//            res.getWriter().print(json.toString());
+//        }
 
     }
 
