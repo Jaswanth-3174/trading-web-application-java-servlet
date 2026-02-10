@@ -6,27 +6,28 @@ function addBalance(){
     `;
 }
 
-function addMoney(){
+function addMoney() {
     const amount = document.getElementById("amount").value;
 
-    fetch("/MyServletApp_war_exploded/api/account/addMoney?amount=" + amount, {
-        method: "POST"
+    fetch("/MyServletApp_war_exploded/api/account/balance", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "amount=" + amount
     })
-        .then(res => res.json())
+        .then(res => res.text())
+        .then(t => JSON.parse(t))
         .then(response => {
-
-            if(!response.success){
+            if (!response.success) {
                 document.getElementById("content").innerHTML = response.message;
                 return;
             }
 
             const b = response.data;
-
             document.getElementById("content").innerHTML = `
-            <h3>${response.message}</h3>
-            <p>Total Balance : Rs.${b.total}</p>
-            <p>Available Balance : Rs.${b.available}</p>
-            <p>Reserved Balance : Rs.${b.reserved}</p>
-        `;
+                <h3>${response.message}</h3>
+                <p>Total: Rs.${b.total}</p>
+                <p>Available: Rs.${b.available}</p>
+                <p>Reserved: Rs.${b.reserved}</p>
+            `;
         });
 }

@@ -1,5 +1,5 @@
 function viewMyTransactions(){
-    fetch("/MyServletApp_war_exploded/api/account/transactions")
+    fetch("/MyServletApp_war_exploded/api/transactions")
         .then(res => res.json())
         .then(response => {
             if(!response.success){

@@ -1,8 +1,10 @@
 function sellOrder() {
 
-    fetch("/MyServletApp_war_exploded/api/account/myStocks")
-        .then(res => res.json())
-        .then(response => {
+    fetch("/MyServletApp_war_exploded/api/orders/myStocks")
+        .then(res => res.text())
+        .then(text => {
+            if (!text) throw new Error("Empty response");
+            const response = JSON.parse(text);
 
             if (!response.success) {
                 document.getElementById("content").innerHTML = response.message;
@@ -33,9 +35,13 @@ function sellOrder() {
 
                 <button onclick="sell()">Place Sell Order</button>
             `;
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("content").innerHTML =
+                "<h3>Error loading stocks</h3>";
         });
 }
-
 
 function sell() {
 
@@ -43,14 +49,25 @@ function sell() {
     const quantity = document.getElementById("quantity").value;
     const price = document.getElementById("price").value;
 
-    fetch("/MyServletApp_war_exploded/api/account/sellOrder" +
-        "?stockName=" + stockName +
-        "&quantity=" + quantity +
-        "&price=" + price,
-        { method: "POST" }
-    )
-        .then(res => res.json())
-        .then(data => {
+    if (!stockName || quantity <= 0 || price <= 0) {
+        alert("Invalid input");
+        return;
+    }
+
+    fetch("/MyServletApp_war_exploded/api/orders/sell", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        body:
+            "stockName=" + encodeURIComponent(stockName) +
+            "&quantity=" + quantity +
+            "&price=" + price
+    })
+        .then(res => res.text())
+        .then(text => {
+            if (!text) throw new Error("Empty response");
+            const data = JSON.parse(text);
 
             if (!data.success) {
                 document.getElementById("content").innerHTML =
@@ -59,23 +76,23 @@ function sell() {
             }
 
             let html = `
-                <h3>Sell Order Result</h3>
-                <p>Order ID: ${data.orderId}</p>
-                <p>Status: ${data.status}</p>
-                <p>Remaining: ${data.remaining}</p>
-            `;
+            <h3>Sell Order Result</h3>
+            <p>Order ID: ${data.orderId}</p>
+            <p>Status: ${data.status}</p>
+            <p>Remaining: ${data.remaining}</p>
+        `;
 
             if (data.trade) {
                 html += `
-                    <hr>
-                    <h4>Trade Executed</h4>
-                    <p>Buyer: ${data.trade.buyer}</p>
-                    <p>Seller: ${data.trade.seller}</p>
-                    <p>Stock: ${data.trade.stock}</p>
-                    <p>Qty: ${data.trade.quantity}</p>
-                    <p>Price: ₹${data.trade.price}</p>
-                    <p>Total: ₹${data.trade.total}</p>
-                `;
+                <hr>
+                <h4>Trade Executed</h4>
+                <p>Buyer: ${data.trade.buyer}</p>
+                <p>Seller: ${data.trade.seller}</p>
+                <p>Stock: ${data.trade.stock}</p>
+                <p>Qty: ${data.trade.quantity}</p>
+                <p>Price: Rs.${data.trade.price}</p>
+                <p>Total: Rs.${data.trade.total}</p>
+            `;
             }
 
             document.getElementById("content").innerHTML = html;
@@ -86,4 +103,3 @@ function sell() {
                 "<h3>Server error while placing sell order</h3>";
         });
 }
-

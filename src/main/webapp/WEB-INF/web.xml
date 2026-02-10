@@ -6,26 +6,6 @@
                              https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
-<!--    <servlet>-->
-<!--        <servlet-name>HelloServlet</servlet-name>-->
-<!--        <servlet-class>com.example.HelloServlet</servlet-class>-->
-<!--    </servlet>-->
-
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>HelloServlet</servlet-name>-->
-<!--        <url-pattern>/hello</url-pattern>-->
-<!--    </servlet-mapping>-->
-
-<!--    authentication login/signup -->
-<!--    <servlet>-->
-<!--        <servlet-name>AuthServlet</servlet-name>-->
-<!--        <servlet-class>controller.AuthServlet</servlet-class>-->
-<!--    </servlet>-->
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>AuthServlet</servlet-name>-->
-<!--        <url-pattern>/auth</url-pattern>-->
-<!--    </servlet-mapping>-->
-
     <servlet>
         <servlet-name>DashboardServlet</servlet-name>
         <servlet-class>controller.DashboardServlet</servlet-class>
@@ -36,13 +16,48 @@
         <url-pattern>/dashboard</url-pattern>
     </servlet-mapping>
 
-<!--    <servlet>-->
-<!--        <servlet-name>ApiServlet</servlet-name>-->
-<!--        <servlet-class>api.ApiServlet</servlet-class>-->
-<!--    </servlet>-->
+    <!-- account api-->
+    <servlet>
+        <servlet-name>AccountApi</servlet-name>
+        <servlet-class>api.AccountApiServlet</servlet-class>
+    </servlet>
 
-<!--    <servlet-mapping>-->
-<!--        <servlet-name>ApiServlet</servlet-name>-->
-<!--        <url-pattern>/api/account</url-pattern>-->
-<!--    </servlet-mapping>-->
+    <servlet-mapping>
+        <servlet-name>AccountApi</servlet-name>
+        <url-pattern>/api/account/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- order api -->
+    <servlet>
+        <servlet-name>OrderApi</servlet-name>
+        <servlet-class>api.OrderApiServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>OrderApi</servlet-name>
+        <url-pattern>/api/orders/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- market api -->
+    <servlet>
+        <servlet-name>MarketApi</servlet-name>
+        <servlet-class>api.MarketApiServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>MarketApi</servlet-name>
+        <url-pattern>/api/market/*</url-pattern>
+    </servlet-mapping>
+
+    <!-- reports api-->
+    <servlet>
+        <servlet-name>ReportsApi</servlet-name>
+        <servlet-class>api.ReportsApiServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ReportsApi</servlet-name>
+        <url-pattern>/api/reports/*</url-pattern>
+    </servlet-mapping>
+
 </web-app>
