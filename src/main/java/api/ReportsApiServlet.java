@@ -16,7 +16,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/transactions/*")
+//@WebServlet("/api/transactions/*")
 public class ReportsApiServlet extends HttpServlet {
 
     private UserDAO userDAO = new UserDAO();

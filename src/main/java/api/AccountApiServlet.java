@@ -13,7 +13,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/account/*")
+//@WebServlet("/api/account/*")
 public class AccountApiServlet extends HttpServlet {
 
     private UserDAO userDAO = new UserDAO();

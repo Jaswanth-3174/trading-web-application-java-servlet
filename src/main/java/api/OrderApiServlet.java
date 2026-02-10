@@ -21,7 +21,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/orders/*")
+//@WebServlet("/api/orders/*")
 public class OrderApiServlet extends HttpServlet {
 
     private UserDAO userDAO = new UserDAO();

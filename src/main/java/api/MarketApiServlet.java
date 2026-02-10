@@ -14,7 +14,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
-@WebServlet("/api/market/*")
+//@WebServlet("/api/market/*")
 public class MarketApiServlet extends HttpServlet {
 
     private StockDAO stockDAO = new StockDAO();
