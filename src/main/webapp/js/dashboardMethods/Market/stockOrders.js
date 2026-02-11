@@ -1,37 +1,38 @@
 function showStockOrderBook() {
 
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Market/stockOrderBook.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+
+            loadStocks();
+        });
+}
+
+function loadStocks() {
+
     fetch("/MyServletApp_war_exploded/api/market/stocks")
         .then(res => res.json())
         .then(response => {
 
-            if (!response.success || !Array.isArray(response.data)) {
-                document.getElementById("content").innerHTML =
-                    response.message || "No stocks available";
+            if (!response.success) {
+                alert("Error loading stocks");
                 return;
             }
 
-            let html = `
-                <h3>Select Stock</h3>
-                <select id="stockDropdown">
-                    <option value="">-- Select Stock --</option>
-            `;
+            const dropdown = document.getElementById("stockDropdown");
+            dropdown.innerHTML = `<option value=""> Select Stock </option>`;
 
             response.data.forEach(s => {
-                html += `<option value="${s.name}">${s.name}</option>`;
+                dropdown.innerHTML += `
+                    <option value="${s.name}">
+                        ${s.name}
+                    </option>
+                `;
             });
-
-            html += `
-                </select>
-                <button type="button" onclick="viewAllStockOrders()">View Order Book</button>
-                <div id="orderBookResult"></div>
-            `;
-
-            document.getElementById("content").innerHTML = html;
         })
         .catch(err => {
-            console.error(err);
-            document.getElementById("content").innerHTML =
-                "Error loading stock list";
+            console.error("Stock load error:", err);
         });
 }
 
@@ -51,63 +52,56 @@ function viewAllStockOrders() {
         },
         body: "stock=" + stock
     })
-        .then(res => res.text())
-        .then(text => {
-
-            if (!text) throw new Error("Empty response");
-            const response = JSON.parse(text);
+        .then(res => res.json())
+        .then(response => {
 
             if (!response.success) {
-                document.getElementById("orderBookResult").innerHTML =
-                    response.message;
+                alert(response.message);
                 return;
             }
 
-            let html = `<h3>Order Book: ${response.stock}</h3>`;
+            document.getElementById("orderBookTitle").innerText = "Order Book: " + response.stock;
 
-            html += `<h4>BUY ORDERS</h4>`;
+            const buyBody = document.getElementById("buyBody");
+            const sellBody = document.getElementById("sellBody");
+
+            buyBody.innerHTML = "";
+            sellBody.innerHTML = "";
+
+            // buy orders
             if (response.buyOrders.length === 0) {
-                html += `<p>No active buy orders</p>`;
+                buyBody.innerHTML = `<tr><td colspan="4">No Buy Orders</td></tr>`;
             } else {
-                html += `
-                    <table border="1" cellpadding="8">
-                    <tr><th>ID</th><th>User</th><th>Qty</th><th>Price</th></tr>`;
                 response.buyOrders.forEach(o => {
-                    html += `
+                    buyBody.innerHTML += `
                         <tr>
                             <td>${o.id}</td>
                             <td>${o.user}</td>
                             <td>${o.qty}</td>
                             <td>${o.price}</td>
-                        </tr>`;
+                        </tr>
+                    `;
                 });
-                html += `</table>`;
             }
 
-            html += `<h4>SELL ORDERS</h4>`;
+            // sell orders
             if (response.sellOrders.length === 0) {
-                html += `<p>No active sell orders</p>`;
+                sellBody.innerHTML = `<tr><td colspan="4">No Sell Orders</td></tr>`;
             } else {
-                html += `
-                    <table border="1" cellpadding="8">
-                    <tr><th>ID</th><th>User</th><th>Qty</th><th>Price</th></tr>`;
                 response.sellOrders.forEach(o => {
-                    html += `
+                    sellBody.innerHTML += `
                         <tr>
                             <td>${o.id}</td>
                             <td>${o.user}</td>
                             <td>${o.qty}</td>
                             <td>${o.price}</td>
-                        </tr>`;
+                        </tr>
+                    `;
                 });
-                html += `</table>`;
             }
 
-            document.getElementById("orderBookResult").innerHTML = html;
         })
         .catch(err => {
-            console.error(err);
-            document.getElementById("orderBookResult").innerHTML =
-                "Server error while loading order book";
+            console.error("Order book error:", err);
         });
 }

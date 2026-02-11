@@ -46,9 +46,9 @@ public class OrderApiServlet extends HttpServlet {
             return;
         }
 
-        // get -> view my orders
-        // post -> buy order, sell order
-        // put -> modify order
+        // get    -> view my orders
+        // post   -> buy order, sell order
+        // put    -> modify order
         // delete -> cancel order
         if (path.equals("") && method.equals("GET")) {
             handleViewOrders(req, res);
@@ -280,6 +280,7 @@ public class OrderApiServlet extends HttpServlet {
         JSONObject response = new JSONObject();
 
         // get -> /api/orders/67
+        // put -> we get all
         int orderId;
         try {
             orderId = Integer.parseInt(req.getPathInfo().substring(1));

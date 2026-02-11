@@ -1,24 +1,34 @@
-function viewStocks(){
-    fetch("/MyServletApp_war_exploded/api/market/stocks")
+function viewStocks() {
+
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Market/viewStocks.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            return fetch("/MyServletApp_war_exploded/api/market/stocks");
+        })
         .then(res => res.json())
         .then(response => {
 
-            if(!response.success){
-                document.getElementById("content").innerHTML = "Error loading stocks!";
+            if (!response.success) {
+                document.getElementById("stocksMessage").innerText = "Error loading stocks!";
                 return;
             }
 
-            let html = `
-                <h3>Stocks</h3>
-                <table border="1" cellpadding="8">
-                    <tr><th>Stock Name</th></tr>
-            `;
+            const stocks = response.data;
+            if (!stocks || stocks.length === 0) {
+                document.getElementById("stocksMessage").innerText = "No stocks available";
+                document.getElementById("stocksTable").style.display = "none";
+                return;
+            }
 
-            response.data.forEach(s => {
-                html += `<tr><td>${s.name}</td></tr>`;
+            const tbody = document.getElementById("stocksBody");
+            stocks.forEach(s => {
+                tbody.innerHTML += `<tr> <td>${s.name}</td> </tr>`;
             });
-
-            html += `</table>`;
-            document.getElementById("content").innerHTML = html;
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("stocksMessage").innerText =
+                "Server error";
         });
 }

@@ -1,32 +1,31 @@
-function viewPortfolio(){
-    fetch("/MyServletApp_war_exploded/api/account/portfolio")
+function viewPortfolio() {
+
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Account/viewPortfolio.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            return fetch("/MyServletApp_war_exploded/api/account/portfolio");
+        })
         .then(res => res.json())
         .then(response => {
-            if(!response.success){
-                document.getElementById("content").innerHTML = response.message;
+
+            if (!response.success) {
+                document.getElementById("portfolioMessage").innerHTML =
+                    "<p style='color:red'>" + response.message + "</p>";
                 return;
             }
 
             const stockholdings = response.data;
-
-            if(stockholdings.length == 0){
-                document.getElementById("content").innerHTML = "<h3>No stocks</h3>";
+            if (stockholdings.length === 0) {
+                document.getElementById("portfolioMessage").innerHTML =
+                    "<p>No stocks</p>";
+                document.getElementById("portfolioTable").style.display = "none";
                 return;
             }
 
-            let html = `
-                <h3>Your Portfolio</h3>
-                <table border="1" cellpadding="8">
-                <tr>
-                    <th>Stock Name</th>
-                    <th>Total</th>
-                    <th>Reserved</th>
-                    <th>Available</th>
-                </tr>
-            `;
-
-            stockholdings.forEach(s =>{
-                html += `
+            const tbody = document.getElementById("portfolioBody");
+            stockholdings.forEach(s => {
+                const row = `
                     <tr>
                         <td>${s.stockName}</td>
                         <td>${s.total}</td>
@@ -34,8 +33,12 @@ function viewPortfolio(){
                         <td>${s.available}</td>
                     </tr>
                 `;
-            })
-            document.getElementById("content").innerHTML = html;
+                tbody.innerHTML += row;
+            });
         })
-        .catch(err => console.log(err));
+        .catch(err => {
+            console.error(err);
+            document.getElementById("portfolioMessage").innerHTML =
+                "<p style='color:red'>API Error</p>";
+        });
 }

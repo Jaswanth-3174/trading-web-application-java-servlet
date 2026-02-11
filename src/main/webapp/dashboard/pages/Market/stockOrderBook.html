@@ -1,0 +1,42 @@
+<h3>Stock Order Book</h3>
+
+<br>
+
+<label>Select Stock:</label>
+<select id="stockDropdown">
+    <option value="">Select Stock</option>
+</select>
+
+<button onclick="viewAllStockOrders()">View Order Book</button>
+
+<hr>
+
+<h3 id="orderBookTitle"></h3>
+
+<h4>BUY ORDERS</h4>
+<table border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Qty</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody id="buyBody"></tbody>
+</table>
+
+<br>
+
+<h4>SELL ORDERS</h4>
+<table border="1" cellpadding="8">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>User</th>
+        <th>Qty</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody id="sellBody"></tbody>
+</table>
