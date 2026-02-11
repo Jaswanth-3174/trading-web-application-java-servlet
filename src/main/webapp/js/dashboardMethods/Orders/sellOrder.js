@@ -1,10 +1,18 @@
 function sellOrder() {
 
-    fetch("/MyServletApp_war_exploded/api/orders/myStocks")
+    fetch("/MyServletApp_war_exploded/dashboard/pages/orders/sellOrder.html")
         .then(res => res.text())
-        .then(text => {
-            if (!text) throw new Error("Empty response");
-            const response = JSON.parse(text);
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            loadMyStocks();
+        });
+}
+
+function loadMyStocks() {
+
+    fetch("/MyServletApp_war_exploded/api/orders/myStocks")
+        .then(res => res.json())
+        .then(response => {
 
             if (!response.success) {
                 document.getElementById("content").innerHTML = response.message;
@@ -19,22 +27,14 @@ function sellOrder() {
                 return;
             }
 
-            let options = `<option value="">Select Stock</option>`;
+            const dropdown = document.getElementById("sellStockName");
+
             stocks.forEach(s => {
-                options += `<option value="${s.name}">
-                    ${s.name} (Available: ${s.qty})
-                </option>`;
+                dropdown.innerHTML +=
+                    `<option value="${s.name}">
+                        ${s.name} (Available: ${s.qty})
+                    </option>`;
             });
-
-            document.getElementById("content").innerHTML = `
-                <h3>Place Sell Order</h3>
-
-                <select id="stockName">${options}</select><br><br>
-                <input type="number" id="quantity" placeholder="Quantity"><br><br>
-                <input type="number" id="price" placeholder="Price"><br><br>
-
-                <button onclick="sell()">Place Sell Order</button>
-            `;
         })
         .catch(err => {
             console.error(err);
@@ -43,11 +43,11 @@ function sellOrder() {
         });
 }
 
-function sell() {
+function submitSellOrder() {
 
-    const stockName = document.getElementById("stockName").value;
-    const quantity = document.getElementById("quantity").value;
-    const price = document.getElementById("price").value;
+    const stockName = document.getElementById("sellStockName").value;
+    const quantity = document.getElementById("sellQuantity").value;
+    const price = document.getElementById("sellPrice").value;
 
     if (!stockName || quantity <= 0 || price <= 0) {
         alert("Invalid input");
@@ -64,42 +64,34 @@ function sell() {
             "&quantity=" + quantity +
             "&price=" + price
     })
-        .then(res => res.text())
-        .then(text => {
-            if (!text) throw new Error("Empty response");
-            const data = JSON.parse(text);
+        .then(res => res.json())
+        .then(data => {
 
             if (!data.success) {
-                document.getElementById("content").innerHTML =
-                    `<h3 style="color:red">${data.message}</h3>`;
+                alert(data.message);
                 return;
             }
 
-            let html = `
-            <h3>Sell Order Result</h3>
-            <p>Order ID: ${data.orderId}</p>
-            <p>Status: ${data.status}</p>
-            <p>Remaining: ${data.remaining}</p>
-        `;
+            document.getElementById("sellResult").style.display = "block";
+
+            document.getElementById("sellOrderId").innerText = data.orderId;
+            document.getElementById("sellStatus").innerText = data.status;
+            document.getElementById("sellRemaining").innerText = data.remaining;
 
             if (data.trade) {
-                html += `
-                <hr>
-                <h4>Trade Executed</h4>
-                <p>Buyer: ${data.trade.buyer}</p>
-                <p>Seller: ${data.trade.seller}</p>
-                <p>Stock: ${data.trade.stock}</p>
-                <p>Qty: ${data.trade.quantity}</p>
-                <p>Price: Rs.${data.trade.price}</p>
-                <p>Total: Rs.${data.trade.total}</p>
-            `;
-            }
 
-            document.getElementById("content").innerHTML = html;
+                document.getElementById("sellTradeSection").style.display = "block";
+
+                document.getElementById("sellBuyer").innerText = data.trade.buyer;
+                document.getElementById("sellSeller").innerText = data.trade.seller;
+                document.getElementById("sellTradeStock").innerText = data.trade.stock;
+                document.getElementById("sellTradeQty").innerText = data.trade.quantity;
+                document.getElementById("sellTradePrice").innerText = data.trade.price;
+                document.getElementById("sellTradeTotal").innerText = data.trade.total;
+            }
         })
         .catch(err => {
             console.error(err);
-            document.getElementById("content").innerHTML =
-                "<h3>Server error while placing sell order</h3>";
+            alert("Server error while placing sell order");
         });
 }

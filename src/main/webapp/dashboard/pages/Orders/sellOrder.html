@@ -1,0 +1,45 @@
+<h3>Place Sell Order</h3>
+
+<label>Stock:</label>
+<select id="sellStockName">
+    <option value="">Select Stock</option>
+</select>
+
+<br><br>
+
+<label>Quantity:</label>
+<input type="number" id="sellQuantity">
+
+<br><br>
+
+<label>Price:</label>
+<input type="number" id="sellPrice">
+
+<br><br>
+
+<button onclick="submitSellOrder()">Place Sell Order</button>
+
+<hr>
+
+<!-- Result Section -->
+<div id="sellResult" style="display:none;">
+
+    <h4>Sell Order Result</h4>
+
+    <p><b>Order ID:</b> <span id="sellOrderId"></span></p>
+    <p><b>Status:</b> <span id="sellStatus"></span></p>
+    <p><b>Remaining:</b> <span id="sellRemaining"></span></p>
+
+    <div id="sellTradeSection" style="display:none;">
+        <hr>
+        <h4>Trade Executed</h4>
+
+        <p><b>Buyer:</b> <span id="sellBuyer"></span></p>
+        <p><b>Seller:</b> <span id="sellSeller"></span></p>
+        <p><b>Stock:</b> <span id="sellTradeStock"></span></p>
+        <p><b>Qty:</b> <span id="sellTradeQty"></span></p>
+        <p><b>Price:</b> ₹<span id="sellTradePrice"></span></p>
+        <p><b>Total:</b> ₹<span id="sellTradeTotal"></span></p>
+    </div>
+
+</div>

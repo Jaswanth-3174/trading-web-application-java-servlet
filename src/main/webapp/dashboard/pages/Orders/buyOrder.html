@@ -1,0 +1,42 @@
+<h3>Place Buy Order</h3>
+
+<label>Stock:</label>
+<select id="buyStockName">
+    <option value="">Select Stock</option>
+</select>
+
+<br><br>
+
+<label>Quantity:</label>
+<input type="number" id="buyQuantity">
+
+<br><br>
+
+<label>Price:</label>
+<input type="number" id="buyPrice">
+
+<br><br>
+
+<button onclick="submitBuyOrder()">Place Buy Order</button>
+
+<hr>
+
+<div id="buyResult" style="display:none;">
+
+    <h4>Order Result</h4>
+    <p><b>Order ID:</b> <span id="resultOrderId"></span></p>
+    <p><b>Status:</b> <span id="resultStatus"></span></p>
+    <p><b>Remaining:</b> <span id="resultRemaining"></span></p>
+
+    <div id="tradeSection" style="display:none;">
+        <hr>
+        <h4>Trade Executed</h4>
+        <p><b>Buyer:</b> <span id="tradeBuyer"></span></p>
+        <p><b>Seller:</b> <span id="tradeSeller"></span></p>
+        <p><b>Stock:</b> <span id="tradeStock"></span></p>
+        <p><b>Qty:</b> <span id="tradeQty"></span></p>
+        <p><b>Price:</b> ₹<span id="tradePrice"></span></p>
+        <p><b>Total:</b> ₹<span id="tradeTotal"></span></p>
+    </div>
+
+</div>

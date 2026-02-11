@@ -1,10 +1,17 @@
 function viewMyOrders() {
+    fetch("/MyServletApp_war_exploded/dashboard/pages/orders/viewMyOrders.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            loadMyOrders();
+        });
+}
+
+function loadMyOrders() {
 
     fetch("/MyServletApp_war_exploded/api/orders")
-        .then(res => res.text())
-        .then(text => {
-            if (!text) throw new Error("Empty response");
-            const data = JSON.parse(text);
+        .then(res => res.json())
+        .then(data => {
 
             if (!data.success) {
                 document.getElementById("content").innerHTML =
@@ -12,37 +19,39 @@ function viewMyOrders() {
                 return;
             }
 
-            let html = `<h3>My Orders</h3>`;
-
             if (data.data.length === 0) {
-                html += `<p>No orders found</p>`;
-            } else {
-                html += `
-                <table border="1" cellpadding="8">
-                <tr>
-                    <th>ID</th><th>Stock</th><th>Qty</th>
-                    <th>Price</th><th>Type</th><th>Action</th>
-                </tr>`;
-
-                data.data.forEach(o => {
-                    html += `
-                    <tr>
-                        <td>${o.id}</td>
-                        <td>${o.stock}</td>
-                        <td>${o.qty}</td>
-                        <td>${o.price}</td>
-                        <td>${o.type}</td>
-                        <td>
-                            <button onclick="openModify(${o.id}, ${o.qty}, ${o.price})">Modify</button>
-                            <button onclick="cancelOrder(${o.id})">Cancel</button>
-                        </td>
-                    </tr>`;
-                });
-
-                html += `</table>`;
+                document.getElementById("noOrdersMessage").style.display = "block";
+                return;
             }
 
-            document.getElementById("content").innerHTML = html;
+            const table = document.getElementById("ordersTable");
+            const tbody = document.getElementById("ordersTableBody");
+
+            table.style.display = "table";
+
+            data.data.forEach(o => {
+
+                const row = document.createElement("tr");
+
+                row.innerHTML = `
+                    <td>${o.id}</td>
+                    <td>${o.stock}</td>
+                    <td>${o.qty}</td>
+                    <td>${o.price}</td>
+                    <td>${o.type}</td>
+                    <td>
+                        <button onclick="openModify(${o.id}, ${o.qty}, ${o.price})">
+                            Modify
+                        </button>
+                        <button onclick="cancelOrder(${o.id})">
+                            Cancel
+                        </button>
+                    </td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
         })
         .catch(err => {
             console.error(err);

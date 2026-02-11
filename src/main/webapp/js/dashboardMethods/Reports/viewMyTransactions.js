@@ -1,35 +1,37 @@
-function viewMyTransactions(){
+function viewMyTransactions() {
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Reports/viewMyTransactions.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+
+            loadMyTransactions();  // 2️⃣ Load data
+        });
+}
+
+function loadMyTransactions() {
     fetch("/MyServletApp_war_exploded/api/transactions")
         .then(res => res.json())
         .then(response => {
-            if(!response.success){
-                document.getElementById("content").innerHTML = response.message;
+
+            if (!response.success) {
+                document.getElementById("myNoDataMsg").innerText =
+                    response.message;
                 return;
             }
 
             const transactions = response.data;
+            const tbody = document.getElementById("myTransactionsBody");
 
-            if(transactions.length === 0){
-                document.getElementById("content").innerHTML = "<h3>No transactions made</h3>";
+            tbody.innerHTML = "";
+
+            if (transactions.length === 0) {
+                document.getElementById("myNoDataMsg").innerText =
+                    "No transactions made";
                 return;
             }
 
-            let html = `
-                <h3> Your Transactions </h3>
-                <table border="1" cellpadding="8">
-                <tr>
-                    <th>Stock ID</th>
-                    <th>Stock Name</th>
-                    <th>Buyer Name</th>
-                    <th>Seller Name</th>
-                     <th>Quantity</th>
-                    <th>Price</th>
-                    <th>Total</th>
-                </tr>
-            `;
-
-            transactions.forEach(t=>{
-                html += `
+            transactions.forEach(t => {
+                tbody.innerHTML += `
                     <tr>
                         <td>${t.stockId}</td>
                         <td>${t.stockName}</td>
@@ -40,8 +42,10 @@ function viewMyTransactions(){
                         <td>${t.total}</td>
                     </tr>
                 `;
-            })
-            document.getElementById("content").innerHTML = html;
+            });
+
         })
-        .catch(err => console.error(err));
+        .catch(err => {
+            console.error("My transactions error:", err);
+        });
 }

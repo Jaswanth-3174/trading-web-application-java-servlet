@@ -1,27 +1,35 @@
-function buyOrder(){
-    document.getElementById("content").innerHTML = `
-        <h3>Place Buy Order</h3>
+function buyOrder() {
 
-        <select id="stockName">
-            <option value="">Select Stock</option>
-            <option value="TCS">TCS</option>
-            <option value="NIFTY">NIFTY</option>
-            <option value="SBI">SBI</option>
-            <option value="INFY">INFY</option>
-        </select>
-        <br><br>
-
-        <input type="number" id="quantity" placeholder="Enter the Quantity"><br><br>
-        <input type="number" id="price" placeholder="Enter the price per share"><br><br>
-
-        <button onclick="buy()">Place Buy Order</button>
-    `;
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Orders/buyOrder.html")
+        .then(res => res.text())
+        .then(html => {
+            document.getElementById("content").innerHTML = html;
+            loadStocksForBuy();
+        });
 }
 
-function buy() {
-    const stockName = document.getElementById("stockName").value;
-    const quantity = document.getElementById("quantity").value;
-    const price = document.getElementById("price").value;
+function loadStocksForBuy() {
+
+    fetch("/MyServletApp_war_exploded/api/market/stocks")
+        .then(res => res.json())
+        .then(response => {
+
+            if (!response.success) return;
+
+            const dropdown = document.getElementById("buyStockName");
+
+            response.data.forEach(s => {
+                dropdown.innerHTML +=
+                    `<option value="${s.name}">${s.name}</option>`;
+            });
+        });
+}
+
+function submitBuyOrder() {
+
+    const stockName = document.getElementById("buyStockName").value;
+    const quantity = document.getElementById("buyQuantity").value;
+    const price = document.getElementById("buyPrice").value;
 
     if (!stockName || quantity <= 0 || price <= 0) {
         alert("Invalid input");
@@ -38,55 +46,32 @@ function buy() {
             "&quantity=" + quantity +
             "&price=" + price
     })
-        .then(res => {
-            if (!res.ok) {
-                return res.text().then(t => { throw new Error(t); });
-            }
-            return res.text();   // ✅ SAFE
-        })
+        .then(res => res.text())
         .then(text => {
-            if (!text) {
-                throw new Error("Empty response from server");
-            }
 
-            const data = JSON.parse(text); // ✅ MANUAL PARSE
+            const data = JSON.parse(text);
 
             if (!data.success) {
-                document.getElementById("content").innerHTML =
-                    data.message || "Order failed";
+                alert(data.message);
                 return;
             }
 
-            let html = `
-            <h3>Order Result</h3>
-            <p>Order ID: ${data.orderId}</p>
-        `;
+            document.getElementById("buyResult").style.display = "block";
 
-            if (data.status) {
-                html += `<p>Status: ${data.status}</p>`;
-            }
-            if (data.remaining !== undefined) {
-                html += `<p>Remaining: ${data.remaining}</p>`;
-            }
+            document.getElementById("resultOrderId").innerText = data.orderId;
+            document.getElementById("resultStatus").innerText = data.status;
+            document.getElementById("resultRemaining").innerText = data.remaining;
 
             if (data.trade) {
-                html += `
-                <hr>
-                <h4>Trade Executed</h4>
-                <p>Buyer: ${data.trade.buyer}</p>
-                <p>Seller: ${data.trade.seller}</p>
-                <p>Stock: ${data.trade.stock}</p>
-                <p>Qty: ${data.trade.quantity}</p>
-                <p>Price: ₹${data.trade.price}</p>
-                <p>Total: ₹${data.trade.total}</p>
-            `;
-            }
 
-            document.getElementById("content").innerHTML = html;
-        })
-        .catch(err => {
-            console.error(err);
-            document.getElementById("content").innerHTML =
-                "<h3>Server error while placing order</h3>";
+                document.getElementById("tradeSection").style.display = "block";
+
+                document.getElementById("tradeBuyer").innerText = data.trade.buyer;
+                document.getElementById("tradeSeller").innerText = data.trade.seller;
+                document.getElementById("tradeStock").innerText = data.trade.stock;
+                document.getElementById("tradeQty").innerText = data.trade.quantity;
+                document.getElementById("tradePrice").innerText = data.trade.price;
+                document.getElementById("tradeTotal").innerText = data.trade.total;
+            }
         });
 }
