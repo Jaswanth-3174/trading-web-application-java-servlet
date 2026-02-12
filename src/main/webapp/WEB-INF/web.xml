@@ -38,6 +38,7 @@
         <url-pattern>/api/orders/*</url-pattern>
     </servlet-mapping>
 
+
     <!-- market api -->
     <servlet>
         <servlet-name>MarketApi</servlet-name>
@@ -57,7 +58,11 @@
 
     <servlet-mapping>
         <servlet-name>ReportsApi</servlet-name>
-        <url-pattern>/api/transactions/*</url-pattern>
+        <url-pattern>/api/transactions</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+        <servlet-name>ReportsApi</servlet-name>
+        <url-pattern>/api/transactions/all</url-pattern>
     </servlet-mapping>
 
 </web-app>
