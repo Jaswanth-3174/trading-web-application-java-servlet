@@ -9,19 +9,13 @@ import com.market.TradeResult;
 import com.trading.Order;
 import com.trading.StockHolding;
 import com.trading.User;
-import jakarta.servlet.annotation.WebServlet;
-import jakarta.servlet.http.HttpServlet;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.*;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 
-//@WebServlet("/api/orders/*")
 public class OrderApiServlet extends HttpServlet {
 
     private UserDAO userDAO = new UserDAO();
@@ -33,61 +27,84 @@ public class OrderApiServlet extends HttpServlet {
     protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
 
         res.setContentType("application/json");
+        JSONObject response = new JSONObject();
 
-        String path = req.getPathInfo();
-        String method = req.getMethod();
-        if (path == null) path = "";
+        try {
+            String path = req.getPathInfo();
+            String method = req.getMethod();
+            if (path == null) path = "";
 
-        HttpSession session = req.getSession(false);
-        if (session == null) {
-            res.getWriter().print(
-                    new JSONObject().put("success", false).put("message", "Session expired")
-            );
-            return;
-        }
+            User user = getLoggedInUser(req);
+            if (user == null) {
+                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.put("success", false);
+                response.put("message", "Unauthorized access");
+                res.getWriter().print(response);
+                return;
+            }
 
-        // get    -> view my orders
-        // post   -> buy order, sell order
-        // put    -> modify order
-        // delete -> cancel order
-        if (path.equals("") && method.equals("GET")) {
-            handleViewOrders(req, res);
-        }
-        else if (path.equals("/buy") && method.equals("POST")) {
-            handleBuy(req, res);
-        }
-        else if (path.equals("/myStocks") && method.equals("GET")) {
-            handleMyStocks(req, res);
-        }
-        else if (path.equals("/sell") && method.equals("POST")) {
-            handleSell(req, res);
-        }
-        else if (method.equals("PUT") && isNumericPath(path)) {
-            handleModify(req, res);
-        }
-        else if (method.equals("DELETE") && isNumericPath(path)) {
-            handleDelete(req, res);
-        }
-        else {
-            res.getWriter().print(new JSONObject().put("success", false).put("message", "Invalid API call"));
+            if (path.equals("") && method.equals("GET")) {
+                handleViewOrders(res, user);
+            }
+            else if (path.equals("/buy") && method.equals("POST")) {
+                handleBuy(req, res, user);
+            }
+            else if (path.equals("/myStocks") && method.equals("GET")) {
+                handleMyStocks(res, user);
+            }
+            else if (path.equals("/sell") && method.equals("POST")) {
+                handleSell(req, res, user);
+            }
+            else if (method.equals("PUT") && isNumericPath(path)) {
+                handleModify(req, res, user);
+            }
+            else if (method.equals("DELETE") && isNumericPath(path)) {
+                handleDelete(req, res, user);
+            }
+            else {
+                response.put("success", false);
+                response.put("message", "Invalid API call");
+                res.getWriter().print(response);
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            res.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            response.put("success", false);
+            response.put("message", "Server error");
+            res.getWriter().print(response);
         }
     }
 
-    private boolean isNumericPath(String path) {
-        if (path == null || path.length() <= 1) return false;
+    private User getLoggedInUser(HttpServletRequest req) {
+        HttpSession session = req.getSession(false);
+        if (session == null) return null;
 
+        String username = (String) session.getAttribute("username");
+        if (username == null) return null;
+
+        return userDAO.findByUsername(username);
+    }
+
+    private boolean isNumericPath(String path) {
         try {
-            Integer.parseInt(path.substring(1)); // remove "/"
+            Integer.parseInt(path.substring(1));
             return true;
         } catch (Exception e) {
             return false;
         }
     }
 
-    private void handleViewOrders(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    private boolean isUnauthorized(Order order, User user) {
+        if(order.getUserId() != user.getUserId()){
+            return false;
+        }
+        return order == null;
+    }
 
-        String username = req.getSession().getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
+    private void handleViewOrders(HttpServletResponse res, User user) throws IOException {
 
         List<Order> orders = orderDAO.findByUserId(user.getUserId());
         JSONArray arr = new JSONArray();
@@ -102,131 +119,148 @@ public class OrderApiServlet extends HttpServlet {
             arr.put(obj);
         }
 
-        res.getWriter().print(new JSONObject().put("success", true).put("data", arr));
+        res.getWriter().print(
+                new JSONObject()
+                        .put("success", true)
+                        .put("data", arr)
+        );
     }
 
-    // buy order
-    private void handleBuy(HttpServletRequest req, HttpServletResponse res) throws IOException {
-
-        String stock = req.getParameter("stockName");
-        String qtyStr = req.getParameter("quantity");
-        String priceStr = req.getParameter("price");
-
-        if (stock == null || qtyStr == null || priceStr == null) {
-            res.getWriter().print(
-                    new JSONObject().put("success", false).put("message", "Missing parameters")
-            );
-            return;
-        }
-
-        int qty = Integer.parseInt(qtyStr);
-        double price = Double.parseDouble(priceStr);
-
-        User user = userDAO.findByUsername(req.getSession().getAttribute("username").toString());
-        Order order = marketPlace.placeBuyOrder(user.getUserId(), stock.toUpperCase(), qty, price);
-
-        if (order == null) {
-            res.getWriter().print(
-                    new JSONObject().put("success", false).put("message", "Insufficient balance")
-            );
-            return;
-        }
-
-        TradeResult t = TradeResult.lastTrade;
-        int remaining = order.getQuantity();
-
-        String status;
-        if (remaining == 0) {
-            status = "FILLED";
-        } else if (t != null) {
-            status = "PARTIALLY_FILLED";
-        } else {
-            status = "WAITING";
-        }
+    private void handleBuy(HttpServletRequest req,
+                           HttpServletResponse res,
+                           User user) throws IOException {
 
         JSONObject response = new JSONObject();
-        response.put("success", true);
-        response.put("orderId", order.getOrderId());
-        response.put("status", status);
-        response.put("remaining", remaining);
 
-        if (t != null) {
-            JSONObject trade = new JSONObject();
-            trade.put("buyer", t.buyer);
-            trade.put("seller", t.seller);
-            trade.put("stock", t.stock);
-            trade.put("quantity", t.quantity);
-            trade.put("price", t.price);
-            trade.put("total", t.total);
-            response.put("trade", trade);
-        }
+        try {
+            String stockName = req.getParameter("stockName");
+            String qtyStr = req.getParameter("quantity");
+            String priceStr = req.getParameter("price");
 
-        TradeResult.lastTrade = null;
-        res.getWriter().print(response);
-    }
+            if (stockName == null || qtyStr == null || priceStr == null) {
+                response.put("success", false);
+                response.put("message", "Missing parameters");
+                res.getWriter().print(response);
+                return;
+            }
 
-    // sell order
-    private void handleMyStocks(HttpServletRequest req, HttpServletResponse res) throws IOException {
+            int quantity = Integer.parseInt(qtyStr);
+            double price = Double.parseDouble(priceStr);
 
-        JSONObject response = new JSONObject();
-        HttpSession session = req.getSession(false);
+            if (quantity <= 0 || price <= 0) {
+                response.put("success", false);
+                response.put("message", "Invalid quantity or price");
+                res.getWriter().print(response);
+                return;
+            }
 
-        if (session == null) {
-            response.put("success", false);
-            response.put("message", "Session expired");
+            Order order = marketPlace.placeBuyOrder(user.getUserId(),
+                    stockName.toUpperCase(), quantity, price);
+
+            if (order == null) {
+                response.put("success", false);
+                response.put("message", "Insufficient balance");
+                res.getWriter().print(response);
+                return;
+            }
+
+            TradeResult trade = TradeResult.lastTrade;
+            int remaining = order.getQuantity();
+
+            String status;
+
+            if (remaining == 0 && trade != null) {
+                status = "FILLED";
+            }
+            else if (trade != null) {
+                status = "PARTIALLY_FILLED";
+            }
+            else {
+                status = "WAITING";
+            }
+
+            response.put("success", true);
+            response.put("orderId", order.getOrderId());
+            response.put("status", status);
+            response.put("remaining", remaining);
+
+            if (trade != null) {
+
+                JSONObject tradeJson = new JSONObject();
+                tradeJson.put("buyer", trade.buyer);
+                tradeJson.put("seller", trade.seller);
+                tradeJson.put("stock", trade.stock);
+                tradeJson.put("quantity", trade.quantity);
+                tradeJson.put("price", trade.price);
+                tradeJson.put("total", trade.total);
+
+                response.put("trade", tradeJson);
+            }
+
+            TradeResult.lastTrade = null;
+
             res.getWriter().print(response);
-            return;
+
+        } catch (Exception e) {
+
+            response.put("success", false);
+            response.put("message", "Server error while placing order");
+            res.getWriter().print(response);
         }
+    }
 
-        String username = session.getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
+    private void handleMyStocks(HttpServletResponse res,
+                                User user) throws IOException {
 
-        List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
+        List<StockHolding> holdings =
+                stockHoldingDAO.findByDematId(user.getDematId());
 
         JSONArray arr = new JSONArray();
 
         for (StockHolding h : holdings) {
             if (h.getAvailableQuantity() > 0) {
                 JSONObject obj = new JSONObject();
-                obj.put("name", StockDAO.getStockNameById(h.getStockId()));
-                obj.put("qty", h.getAvailableQuantity());
+                obj.put("name",
+                        StockDAO.getStockNameById(h.getStockId()));
+                obj.put("qty",
+                        h.getAvailableQuantity());
                 arr.put(obj);
             }
         }
 
-        response.put("success", true);
-        response.put("data", arr);
-        res.getWriter().print(response);
+        res.getWriter().print(
+                new JSONObject()
+                        .put("success", true)
+                        .put("data", arr)
+        );
     }
 
-    private void handleSell(HttpServletRequest req, HttpServletResponse res) throws IOException {
-
-        JSONObject response = new JSONObject();
-        HttpSession session = req.getSession(false);
-
-        if (session == null) {
-            response.put("success", false);
-            response.put("message", "Session expired");
-            res.getWriter().print(response);
-            return;
-        }
+    private void handleSell(HttpServletRequest req,
+                            HttpServletResponse res,
+                            User user) throws IOException {
 
         String stockName = req.getParameter("stockName");
         String qtyStr = req.getParameter("quantity");
         String priceStr = req.getParameter("price");
 
         if (stockName == null || qtyStr == null || priceStr == null) {
-            response.put("success", false);
-            response.put("message", "Missing parameters");
-            res.getWriter().print(response);
+            res.getWriter().print(
+                    new JSONObject().put("success", false)
+                            .put("message", "Missing parameters")
+            );
             return;
         }
 
         int quantity = Integer.parseInt(qtyStr);
         double price = Double.parseDouble(priceStr);
 
-        String username = session.getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
+        if (quantity <= 0 || price <= 0) {
+            res.getWriter().print(
+                    new JSONObject().put("success", false)
+                            .put("message", "Invalid quantity or price")
+            );
+            return;
+        }
 
         Order order = marketPlace.placeSellOrder(
                 user.getUserId(),
@@ -236,134 +270,103 @@ public class OrderApiServlet extends HttpServlet {
         );
 
         if (order == null) {
-            response.put("success", false);
-            response.put("message", "Not enough stocks available");
-            res.getWriter().print(response);
+            res.getWriter().print(
+                    new JSONObject().put("success", false)
+                            .put("message", "Not enough stocks available")
+            );
             return;
         }
 
-        TradeResult t = TradeResult.lastTrade;
-        int remaining = order.getQuantity();
-
-        String status;
-        if (remaining == 0) {
-            status = "FILLED";
-        } else if (t != null) {
-            status = "PARTIALLY_FILLED";
-        } else {
-            status = "WAITING";
-        }
-
-        response.put("success", true);
-        response.put("orderId", order.getOrderId());
-        response.put("status", status);
-        response.put("remaining", remaining);
-
-        if (t != null) {
-            JSONObject trade = new JSONObject();
-            trade.put("buyer", t.buyer);
-            trade.put("seller", t.seller);
-            trade.put("stock", t.stock);
-            trade.put("quantity", t.quantity);
-            trade.put("price", t.price);
-            trade.put("total", t.total);
-            response.put("trade", trade);
-        }
-
-        TradeResult.lastTrade = null;
-        res.getWriter().print(response);
+        res.getWriter().print(
+                new JSONObject()
+                        .put("success", true)
+                        .put("orderId", order.getOrderId())
+                        .put("remaining", order.getQuantity())
+        );
     }
 
-    // modify order
-    private void handleModify(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    private void handleModify(HttpServletRequest req,
+                              HttpServletResponse res,
+                              User user) throws IOException {
 
         JSONObject response = new JSONObject();
 
-        // get -> /api/orders/67
-        // put -> we get all
-        int orderId;
         try {
-            orderId = Integer.parseInt(req.getPathInfo().substring(1));
+
+            int orderId = Integer.parseInt(req.getPathInfo().substring(1));
+            Order order = orderDAO.findById(orderId);
+
+            if (isUnauthorized(order, user)) {
+                res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                response.put("success", false);
+                response.put("message", "Unauthorized access");
+                res.getWriter().print(response);
+                return;
+            }
+
+            String body = req.getReader().readLine();  // quantity=5&price=100
+
+            if (body == null || body.isEmpty()) {
+                response.put("success", false);
+                response.put("message", "Invalid input");
+                res.getWriter().print(response);
+                return;
+            }
+
+            String[] parts = body.split("&");
+            int quantity = Integer.parseInt(parts[0].split("=")[1]);
+            double price = Double.parseDouble(parts[1].split("=")[1]);
+
+            if (quantity <= 0 || price <= 0) {
+                response.put("success", false);
+                response.put("message", "Invalid quantity or price");
+                res.getWriter().print(response);
+                return;
+            }
+
+            boolean ok = marketPlace.modifyOrder(
+                    user.getUserId(), orderId, quantity, price
+            );
+
+            response.put("success", ok);
+            response.put("message", ok ? "Order modified" : "Modification failed");
+
+            res.getWriter().print(response);
+
         } catch (Exception e) {
+
+            e.printStackTrace();
             response.put("success", false);
-            response.put("message", "Invalid order id");
+            response.put("message", "Server error");
             res.getWriter().print(response);
-            return;
         }
-
-        BufferedReader br = req.getReader();
-        String body = br.readLine();   // quantity=5&price=25
-
-        if (body == null || body.isEmpty()) {
-            response.put("success", false);
-            response.put("message", "Invalid input");
-            res.getWriter().print(response);
-            return;
-        }
-
-        String[] parts = body.split("&");
-        int qty = Integer.parseInt(parts[0].split("=")[1]);
-        double price = Double.parseDouble(parts[1].split("=")[1]);
-
-        // auth check
-        String username = req.getSession().getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
-
-        if (user == null) {
-            response.put("success", false);
-            response.put("message", "Unauthorized access");
-            res.getWriter().print(response);
-            return;
-        }
-        Order order = orderDAO.findById(orderId);
-        if (order == null || order.getUserId() != user.getUserId()) {
-            response.put("success", false);
-            response.put("message", "Unauthorized access");
-            res.getWriter().print(response);
-            return;
-        }
-
-        boolean ok = marketPlace.modifyOrder(user.getUserId(), orderId, qty, price);
-        response.put("success", ok);
-        response.put("message", ok ? "Order modified" : "Cannot modify order");
-        res.getWriter().print(response);
     }
 
-    // cancel order
-    private void handleDelete(HttpServletRequest req, HttpServletResponse res) throws IOException {
+    private void handleDelete(HttpServletRequest req,
+                              HttpServletResponse res,
+                              User user) throws IOException {
 
-        JSONObject response = new JSONObject();
-
-        int orderId;
-        try {
-            orderId = Integer.parseInt(req.getPathInfo().substring(1));
-        } catch (Exception e) {
-            response.put("success", false);
-            response.put("message", "Invalid order id");
-            res.getWriter().print(response);
-            return;
-        }
-
-        // authorization check
-        String username = req.getSession().getAttribute("username").toString();
-        User user = userDAO.findByUsername(username);
-        if (user == null) {
-            response.put("success", false);
-            response.put("message", "Unauthorized access");
-            res.getWriter().print(response);
-            return;
-        }
+        int orderId = Integer.parseInt(req.getPathInfo().substring(1));
         Order order = orderDAO.findById(orderId);
-        if (order == null || order.getUserId() != user.getUserId()) {
-            response.put("success", false);
-            response.put("message", "Unauthorized access");
-            res.getWriter().print(response);
+
+        if (isUnauthorized(order, user)) {
+            res.setStatus(HttpServletResponse.SC_FORBIDDEN);
+            res.getWriter().print(
+                    new JSONObject().put("success", false)
+                            .put("message", "Unauthorized access")
+            );
             return;
         }
 
-        boolean ok = marketPlace.cancelOrder(user.getUserId(), orderId);
-        response.put("success", ok);
-        response.put("message", ok ? "Order cancelled" : "Cannot cancel order");
-        res.getWriter().print(response);
+        boolean ok = marketPlace.cancelOrder(
+                user.getUserId(), orderId
+        );
+
+        res.getWriter().print(
+                new JSONObject()
+                        .put("success", ok)
+                        .put("message",
+                                ok ? "Order cancelled" : "Cancel failed")
+        );
     }
 }

@@ -1,5 +1,5 @@
 function viewMyOrders() {
-    fetch("/MyServletApp_war_exploded/dashboard/pages/orders/viewMyOrders.html")
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Orders/viewMyOrders.html")
         .then(res => res.text())
         .then(html => {
             document.getElementById("content").innerHTML = html;

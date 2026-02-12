@@ -1,12 +1,23 @@
 function sellOrder() {
 
-    fetch("/MyServletApp_war_exploded/dashboard/pages/orders/sellOrder.html")
-        .then(res => res.text())
+    fetch("/MyServletApp_war_exploded/dashboard/pages/Orders/sellOrder.html")
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Failed to load sellOrder.html");
+            }
+            return res.text();
+        })
         .then(html => {
             document.getElementById("content").innerHTML = html;
             loadMyStocks();
+        })
+        .catch(err => {
+            console.error(err);
+            document.getElementById("content").innerHTML =
+                "<h3>Error loading Sell Order page</h3>";
         });
 }
+
 
 function loadMyStocks() {
 
@@ -21,13 +32,15 @@ function loadMyStocks() {
 
             const stocks = response.data;
 
-            if (stocks.length === 0) {
+            if (!stocks || stocks.length === 0) {
                 document.getElementById("content").innerHTML =
                     "<h3>You don't own any stocks to sell</h3>";
                 return;
             }
 
             const dropdown = document.getElementById("sellStockName");
+
+            dropdown.innerHTML = "";
 
             stocks.forEach(s => {
                 dropdown.innerHTML +=
@@ -42,6 +55,7 @@ function loadMyStocks() {
                 "<h3>Error loading stocks</h3>";
         });
 }
+
 
 function submitSellOrder() {
 
@@ -61,22 +75,30 @@ function submitSellOrder() {
         },
         body:
             "stockName=" + encodeURIComponent(stockName) +
-            "&quantity=" + quantity +
-            "&price=" + price
+            "&quantity=" + encodeURIComponent(quantity) +
+            "&price=" + encodeURIComponent(price)
     })
         .then(res => res.json())
         .then(data => {
 
+            console.log("Sell Response:", data); // 👈 Debugging
+
             if (!data.success) {
-                alert(data.message);
+                alert(data.message || "Sell order failed");
                 return;
             }
 
+            const orderId = data.orderId || (data.data && data.data.orderId);
+            const status = data.status || (data.data && data.data.status);
+            const remaining = data.remaining || (data.data && data.data.remaining);
+
             document.getElementById("sellResult").style.display = "block";
 
-            document.getElementById("sellOrderId").innerText = data.orderId;
-            document.getElementById("sellStatus").innerText = data.status;
-            document.getElementById("sellRemaining").innerText = data.remaining;
+            document.getElementById("sellOrderId").innerText = orderId || "-";
+            document.getElementById("sellStatus").innerText = status || "OPEN";
+            document.getElementById("sellRemaining").innerText = remaining ?? 0;
+
+            document.getElementById("sellTradeSection").style.display = "none";
 
             if (data.trade) {
 
