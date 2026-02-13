@@ -248,8 +248,7 @@ public class MarketPlace {
 //        System.out.println("+---------------------------------------+\n");
     }
 
-    public boolean modifyOrder(int userId, int orderId, int newQuantity, double newPrice)
-            {
+    public boolean modifyOrder(int userId, int orderId, int newQuantity, double newPrice) {
 
         try {
             DatabaseConfig.beginTransaction();
@@ -268,21 +267,15 @@ public class MarketPlace {
 
                 double newReserved = newQuantity * newPrice;
                 if (!tradingAccountDAO.reserveBalance(userId, newReserved)) {
-                    tradingAccountDAO.reserveBalance(userId, oldReserved);
+               //   tradingAccountDAO.reserveBalance(userId, oldReserved);
                     DatabaseConfig.rollback();
                     return false;
                 }
             } else {
-                stockHoldingDAO.releaseReservedStocks(
-                        user.getDematId(), order.getStockId(), order.getQuantity()
-                );
+                stockHoldingDAO.releaseReservedStocks(user.getDematId(), order.getStockId(), order.getQuantity());
 
-                if (!stockHoldingDAO.reserveStocks(
-                        user.getDematId(), order.getStockId(), newQuantity
-                )) {
-                    stockHoldingDAO.reserveStocks(
-                            user.getDematId(), order.getStockId(), order.getQuantity()
-                    );
+                if (!stockHoldingDAO.reserveStocks(user.getDematId(), order.getStockId(), newQuantity)) {
+               //   stockHoldingDAO.reserveStocks(user.getDematId(), order.getStockId(), order.getQuantity());
                     DatabaseConfig.rollback();
                     return false;
                 }
@@ -314,8 +307,6 @@ public class MarketPlace {
 
         return true;
     }
-
-
 
     public boolean cancelOrder(int userId, int orderId){
         try {

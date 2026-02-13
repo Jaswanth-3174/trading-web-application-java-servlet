@@ -8,10 +8,25 @@
     <meta http-equiv="Expires" content="0">
 
     <style>
+        table, td, th {
+            border: 1px solid;
+            padding: 10px;
+            margin: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+        }
+
+        th{
+            background: deepskyblue;
+        }
+
         body{
             margin:0;
             font-family:Arial, sans-serif;
             background:#f8fafc;
+            text-align: center;
         }
 
         .topbar{
@@ -62,6 +77,8 @@
             padding:20px;
         }
     </style>
+
+    <link rel="stylesheet" href="/MyServletApp_war_exploded/styles.css">
 </head>
 
 <body>
@@ -146,6 +163,5 @@
     <script src="/MyServletApp_war_exploded/js/dashboardMethods/Reports/viewMyTransactions.js"></script>
 
     <script src="/MyServletApp_war_exploded/js/auth.js"></script>
-
 </body>
 </html>
