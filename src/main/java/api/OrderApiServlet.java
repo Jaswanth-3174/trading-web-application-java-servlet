@@ -1,9 +1,6 @@
 package api;
 
-import com.dao.OrderDAO;
-import com.dao.StockDAO;
-import com.dao.StockHoldingDAO;
-import com.dao.UserDAO;
+import com.dao.*;
 import com.market.MarketPlace;
 import com.market.TradeResult;
 import com.trading.Order;
@@ -22,6 +19,7 @@ public class OrderApiServlet extends HttpServlet {
     private OrderDAO orderDAO = new OrderDAO();
     private MarketPlace marketPlace = new MarketPlace();
     private StockHoldingDAO stockHoldingDAO = new StockHoldingDAO();
+    private TransactionDAO transactionDAO = new TransactionDAO();
 
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse res) throws IOException {
@@ -98,10 +96,9 @@ public class OrderApiServlet extends HttpServlet {
     }
 
     private boolean isUnauthorized(Order order, User user) {
-        if(order.getUserId() != user.getUserId()){
-            return false;
-        }
-        return order == null;
+        if(order == null) return true;
+        if(order.getUserId() != user.getUserId()) return true;
+        return false;
     }
 
     private void handleViewOrders(HttpServletResponse res, User user) throws IOException {
@@ -164,7 +161,7 @@ public class OrderApiServlet extends HttpServlet {
                 return;
             }
 
-            TradeResult trade = TradeResult.lastTrade;
+            TradeResult trade = transactionDAO.getLastTrade();
             int remaining = order.getQuantity();
 
             String status;
@@ -187,17 +184,15 @@ public class OrderApiServlet extends HttpServlet {
             if (trade != null) {
 
                 JSONObject tradeJson = new JSONObject();
-                tradeJson.put("buyer", trade.buyer);
-                tradeJson.put("seller", trade.seller);
-                tradeJson.put("stock", trade.stock);
-                tradeJson.put("quantity", trade.quantity);
-                tradeJson.put("price", trade.price);
-                tradeJson.put("total", trade.total);
+                tradeJson.put("buyer", trade.getBuyer());
+                tradeJson.put("seller", trade.getSeller());
+                tradeJson.put("stock", trade.getStock());
+                tradeJson.put("quantity", trade.getQuantity());
+                tradeJson.put("price", trade.getPrice());
+                tradeJson.put("total", trade.getTotal());
 
                 response.put("trade", tradeJson);
             }
-
-            TradeResult.lastTrade = null;
 
             res.getWriter().print(response);
 
@@ -212,8 +207,7 @@ public class OrderApiServlet extends HttpServlet {
     private void handleMyStocks(HttpServletResponse res,
                                 User user) throws IOException {
 
-        List<StockHolding> holdings =
-                stockHoldingDAO.findByDematId(user.getDematId());
+        List<StockHolding> holdings = stockHoldingDAO.findByDematId(user.getDematId());
 
         JSONArray arr = new JSONArray();
 
@@ -262,12 +256,8 @@ public class OrderApiServlet extends HttpServlet {
             return;
         }
 
-        Order order = marketPlace.placeSellOrder(
-                user.getUserId(),
-                stockName.toUpperCase(),
-                quantity,
-                price
-        );
+        Order order = marketPlace.placeSellOrder(user.getUserId(),
+                stockName.toUpperCase(), quantity, price);
 
         if (order == null) {
             res.getWriter().print(
@@ -324,9 +314,7 @@ public class OrderApiServlet extends HttpServlet {
                 return;
             }
 
-            boolean ok = marketPlace.modifyOrder(
-                    user.getUserId(), orderId, quantity, price
-            );
+            boolean ok = marketPlace.modifyOrder(user.getUserId(), orderId, quantity, price);
 
             response.put("success", ok);
             response.put("message", ok ? "Order modified" : "Modification failed");
@@ -358,9 +346,7 @@ public class OrderApiServlet extends HttpServlet {
             return;
         }
 
-        boolean ok = marketPlace.cancelOrder(
-                user.getUserId(), orderId
-        );
+        boolean ok = marketPlace.cancelOrder(user.getUserId(), orderId);
 
         res.getWriter().print(
                 new JSONObject()

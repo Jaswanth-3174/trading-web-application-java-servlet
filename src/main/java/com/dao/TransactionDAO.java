@@ -1,8 +1,13 @@
 package com.dao;
 
+import com.dbConnection.DatabaseConfig;
 import com.dbOperations.*;
+import com.market.TradeResult;
 import com.trading.Transaction;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
@@ -75,5 +80,50 @@ public class TransactionDAO {
             transactions.add(mapToTransaction(row));
         }
         return transactions;
+    }
+
+    public TradeResult getLastTrade() {
+
+        String sql = "SELECT t.quantity, t.price, " +
+                "(t.quantity * t.price) AS total, " +
+                "s.stock_name, " +
+                "buy.username AS buyer_name, " +
+                "sel.username AS seller_name " +
+                "FROM transactions t " +
+                "JOIN stocks s ON t.stock_id = s.stock_id " +
+                "JOIN users buy ON t.buyer_id = buy.user_id " +
+                "JOIN users sel ON t.seller_id = sel.user_id " +
+                "ORDER BY t.transactions_id DESC LIMIT 1";
+
+        Connection conn = DatabaseConfig.getConnection();
+        PreparedStatement ps = null;
+        try {
+            ps = conn.prepareStatement(sql);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        ResultSet rs = null;
+        try {
+            rs = ps.executeQuery();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        try {
+            if (rs.next()) {
+                return new TradeResult(
+                        rs.getString("buyer_name"),
+                        rs.getString("seller_name"),
+                        rs.getString("stock_name"),
+                        rs.getInt("quantity"),
+                        rs.getDouble("price"),
+                        rs.getDouble("total")
+                );
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+        return null;
     }
 }

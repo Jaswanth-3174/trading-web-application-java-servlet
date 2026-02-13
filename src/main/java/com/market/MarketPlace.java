@@ -220,10 +220,6 @@ public class MarketPlace {
 
             printTradeDetails(buy.getOrderId(), quantity, tradePrice, total, buyer, seller);
 
-            TradeResult.lastTrade = new TradeResult(buyer.getUserName(), seller.getUserName(),
-                    StockDAO.getStockNameById(buy.getStockId()), quantity,
-                    tradePrice, total
-            );
             buy.setQuantity(newBuyQty);
             sell.setQuantity(newSellQty);
 
