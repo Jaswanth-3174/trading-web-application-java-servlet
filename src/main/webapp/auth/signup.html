@@ -6,6 +6,76 @@
     <meta http-equiv="Expires" content="0">
 
     <title>Sign Up</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 100px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+        }
+
+        form {
+            display: inline-block;
+            text-align: center;
+        }
+
+        div {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: inline-block;
+            width: 130px;
+            font-weight: bold;
+        }
+
+        input {
+            padding: 5px;
+            width: 180px;
+        }
+
+        button {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: deepskyblue;
+            border: none;
+            border-radius: 5px;
+        }
+
+        button:hover {
+            background: dodgerblue;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+
+        .radio-group label {
+            width: 130px;
+            display: inline-block;
+            font-weight: bold;
+        }
+
+        .radio-group input {
+            width: auto;
+            margin-left: 5px;
+        }
+
+    </style>
+
 </head>
 <body>
 <h1>Create Account</h1>
@@ -37,11 +107,12 @@
         <input type="password" name="demat_password" required>
     </div>
 
-    <div>
-        <label>Are you a Promoter?</label>
+    <div class="radio-group">
+        <label>Promoter:</label>
         <input type="radio" name="is_promoter" value="yes" required> Yes
         <input type="radio" name="is_promoter" value="no"> No
     </div>
+
 
     <button type="submit">Sign Up</button>
     </form>

@@ -8,14 +8,14 @@ function deleteMyAccount() {
 
 function confirmDelete() {
 
-    const data = document.getElementById("confirmBox").value;
+    const data = document.getElementById("confirmBox").value.trim();
+
+    const formData = new URLSearchParams();
+    formData.append("data", data);
 
     fetch("/MyServletApp_war_exploded/api/account/delete", {
-        method: "DELETE",
-        headers: {
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        body: "data=" + data
+        method: "POST",
+        body: formData
     })
         .then(res => res.json())
         .then(response => {

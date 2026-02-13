@@ -1,11 +1,44 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>Trading Application</title>
-    </head>
-    <body>
-        <h1>Welcome to Trading Application</h1>
-        <button><a href="/MyServletApp_war_exploded/auth/login.html">Login</a></button>
-        <button><a href="/MyServletApp_war_exploded/auth/signup.html">Sign Up</a></button>
-    </body>
+<head>
+    <title>Trading Application</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            margin-top: 200px;
+        }
+
+        h1 {
+            margin-bottom: 30px;
+            font-size: 40px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background: deepskyblue;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 20px;
+            border: black;
+            border: 1px solid black;
+        }
+
+        .btn:hover {
+            background: dodgerblue;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Welcome to Trading Application</h1>
+
+    <a class="btn" href="/MyServletApp_war_exploded/auth/login.html">Login</a>
+    <a class="btn" href="/MyServletApp_war_exploded/auth/signup.html">Sign Up</a>
+
+</body>
 </html>

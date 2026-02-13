@@ -45,7 +45,7 @@ public class AccountApiServlet extends HttpServlet {
         else if (path.equals("/portfolio") && method.equals("GET")) {
             handleViewPortfolio(req, res);
         }
-        else if (path.equals("/delete") && method.equals("DELETE")) {
+        else if (path.equals("/delete") && method.equals("POST")) {
             handleDeleteAccount(req, res);
         }
         else {
@@ -135,17 +135,20 @@ public class AccountApiServlet extends HttpServlet {
 
         JSONObject response = new JSONObject();
 
-        BufferedReader br = req.getReader();
-        String body = br.readLine(); // confirm=CONFIRM
+        String data = req.getParameter("data");
 
-        if (body == null || !body.equalsIgnoreCase("confirm=CONFIRM")) {
+        System.out.println("DATA RECEIVED = [" + data + "]");
+
+        if (data == null || !data.trim().equalsIgnoreCase("CONFIRM")) {
             response.put("success", false)
                     .put("message", "Type CONFIRM to delete account");
             res.getWriter().print(response);
             return;
         }
 
-        User user = userDAO.findByUsername(req.getSession().getAttribute("username").toString());
+        User user = userDAO.findByUsername(
+                req.getSession().getAttribute("username").toString()
+        );
 
         userDAO.deleteUser(user.getUserId());
         req.getSession().invalidate();
@@ -155,4 +158,5 @@ public class AccountApiServlet extends HttpServlet {
 
         res.getWriter().print(response);
     }
+
 }
