@@ -24,6 +24,11 @@ public class StockHolding {
     public int getStockId(){
         return stockId;
     }
+    public String getStockName(){
+        int stockId = getStockId();
+        return StockDAO.getStockNameById(stockId);
+    }
+
     public void setStockId(int id){
         this.stockId = id;
     }
@@ -52,7 +57,4 @@ public class StockHolding {
         return totalQuantity - reservedQuantity;
     }
 
-    public String getStockName() throws SQLException {
-        return StockDAO.getStockNameById(this.stockId);
-    }
 }

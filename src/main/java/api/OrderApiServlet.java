@@ -214,10 +214,8 @@ public class OrderApiServlet extends HttpServlet {
         for (StockHolding h : holdings) {
             if (h.getAvailableQuantity() > 0) {
                 JSONObject obj = new JSONObject();
-                obj.put("name",
-                        StockDAO.getStockNameById(h.getStockId()));
-                obj.put("qty",
-                        h.getAvailableQuantity());
+                obj.put("name", h.getStockName());
+                obj.put("qty", h.getAvailableQuantity());
                 arr.put(obj);
             }
         }
