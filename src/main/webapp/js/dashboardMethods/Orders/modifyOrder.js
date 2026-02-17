@@ -64,6 +64,8 @@ function openModify(id, qty, price){
         Price:<input type="number" id="price" value="${price}"><br><br>
 
         <button onclick="submitModify(${id})">Save</button>
+
+        <p id="modifyMsg"></p>
     `;
 }
 
@@ -91,19 +93,20 @@ function submitModify(id) {
             if (!text) throw new Error("Empty response");
             const data = JSON.parse(text);
 
+            const msg = document.getElementById("modifyMsg");
+
             if (data.success) {
-                document.getElementById("content").innerHTML =
-                    "<h3 style='color:green'>Order modified successfully!</h3>";
+                msg.style.color = "green";
+                msg.innerText = "Order modified successfully!";
                 setTimeout(viewMyOrders, 1000);
             } else {
-                document.getElementById("content").innerHTML =
-                    `<h3 style='color:red'>${data.message}</h3>`;
+                msg.style.color = "red";
+                msg.innerText = data.message;   // 👈 show below form
             }
         })
         .catch(err => {
             console.error(err);
-            document.getElementById("content").innerHTML =
-                "<h3>Server error while modifying order</h3>";
+            document.getElementById("modifyMsg").innerText =
+                "Server error while modifying order";
         });
 }
-

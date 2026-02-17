@@ -161,12 +161,18 @@ public class OrderApiServlet extends HttpServlet {
                 return;
             }
 
-            TradeResult trade = transactionDAO.getLastTrade();
-            int remaining = order.getQuantity();
+            TradeResult trade = transactionDAO.getLastTrade(user.getUserId(), order.getOrderId());
+            if (trade == null && order.getQuantity() == 0) {
+                trade = transactionDAO.getLastTrade(
+                        user.getUserId(),
+                        order.getStockId()
+                );
+            }
 
+            int remaining = order.getQuantity();
             String status;
 
-            if (remaining == 0 && trade != null) {
+            if (remaining == 0) {
                 status = "FILLED";
             }
             else if (trade != null) {
@@ -304,6 +310,13 @@ public class OrderApiServlet extends HttpServlet {
             String[] parts = body.split("&");
             int quantity = Integer.parseInt(parts[0].split("=")[1]);
             double price = Double.parseDouble(parts[1].split("=")[1]);
+
+            if(order.getQuantity() == quantity && order.getPrice() == price){
+                response.put("sucess", false);
+                response.put("message", "Change the price or quantity to modify!");
+                res.getWriter().print(response);
+                return;
+            }
 
             if (quantity <= 0 || price <= 0) {
                 response.put("success", false);

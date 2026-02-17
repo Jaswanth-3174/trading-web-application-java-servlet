@@ -13,10 +13,10 @@ import java.util.*;
 
 public class TransactionDAO {
 
-    private final String table = "transactions";
-    private final String tableAlias = "transactions t";
+    private static final String table = "transactions";
+    private static final String tableAlias = "transactions t";
 
-    private final String joinCondition = "JOIN stocks s ON t.stock_id = s.stock_id " +
+    private static final String joinCondition = "JOIN stocks s ON t.stock_id = s.stock_id " +
             "JOIN users buy ON t.buyer_id = buy.user_id " +
             "JOIN users sel ON t.seller_id = sel.user_id";
 
@@ -82,48 +82,35 @@ public class TransactionDAO {
         return transactions;
     }
 
-    public TradeResult getLastTrade() {
+    public TradeResult getLastTrade(int userId, int stockId) {
 
-        String sql = "SELECT t.quantity, t.price, " +
-                "(t.quantity * t.price) AS total, " +
-                "s.stock_name, " +
-                "buy.username AS buyer_name, " +
-                "sel.username AS seller_name " +
-                "FROM transactions t " +
-                "JOIN stocks s ON t.stock_id = s.stock_id " +
-                "JOIN users buy ON t.buyer_id = buy.user_id " +
-                "JOIN users sel ON t.seller_id = sel.user_id " +
-                "ORDER BY t.transactions_id DESC LIMIT 1";
+        String[] tradeColumns = {"t.quantity", "t.price", "(t.quantity * t.price) AS total",
+                "s.stock_name", "buy.username AS buyer_name", "sel.username AS seller_name"
+        };
 
-        Connection conn = DatabaseConfig.getConnection();
-        PreparedStatement ps = null;
-        try {
-            ps = conn.prepareStatement(sql);
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-        ResultSet rs = null;
-        try {
-            rs = ps.executeQuery();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        SpecialCondition extra = new SpecialCondition(
+                "(t.buyer_id = ? OR t.seller_id = ?) AND t.stock_id = ?",
+                userId, userId, stockId
+        );
 
-        try {
-            if (rs.next()) {
-                return new TradeResult(
-                        rs.getString("buyer_name"),
-                        rs.getString("seller_name"),
-                        rs.getString("stock_name"),
-                        rs.getInt("quantity"),
-                        rs.getDouble("price"),
-                        rs.getDouble("total")
+        ArrayList<HashMap<String, Object>> rows =
+                SelectOperation.selectWithAdvancedCondition(tableAlias, tradeColumns,
+                        joinCondition, null, extra,
+                        "t.transactions_id DESC",
+                        1
                 );
-            }
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
 
-        return null;
+        if (rows.isEmpty()) return null;
+
+        HashMap<String, Object> row = rows.get(0);
+        return new TradeResult(
+                (String) row.get("buyer_name"),
+                (String) row.get("seller_name"),
+                (String) row.get("stock_name"),
+                ((Number) row.get("quantity")).intValue(),
+                ((Number) row.get("price")).doubleValue(),
+                ((Number) row.get("total")).doubleValue()
+        );
     }
+
 }

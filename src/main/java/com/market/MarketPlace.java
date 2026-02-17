@@ -128,7 +128,7 @@ public class MarketPlace {
         while (true) {
             List<Order> sells = (lastOrderId == 0)
                     ? orderDAO.getSellOrders(stockId)
-                    : orderDAO.getNextSellOrders(stockId, lastPrice, lastOrderId);
+                    : orderDAO.getSellOrders(stockId, lastPrice, lastOrderId);
 
             if (sells.isEmpty()) break;
 
@@ -160,7 +160,7 @@ public class MarketPlace {
         while (true) {
             List<Order> buys = (lastOrderId == 0)
                     ? orderDAO.getBuyOrders(stockId)
-                    : orderDAO.getNextBuyOrders(stockId, lastPrice, lastOrderId);
+                    : orderDAO.getBuyOrders(stockId, lastPrice, lastOrderId);
 
             if (buys.isEmpty()) break;
             for (Order buy : buys) {

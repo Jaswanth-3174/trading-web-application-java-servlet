@@ -7,12 +7,12 @@ import java.sql.*;
 import java.util.*;
 
 public class OrderDAO {
-    private String table = "orders";          // for insert, update, delete
-    private String tableAlias = "orders o";   // for select with join
-    private String joinCondition = "JOIN stocks s ON o.stock_id = s.stock_id";
+    private static final String table = "orders";          // for insert, update, delete
+    private static final String tableAlias = "orders o";   // for select with join
+    private static final String joinCondition = "JOIN stocks s ON o.stock_id = s.stock_id";
 
-    private final String[] COLUMNS = {"o.order_id", "o.user_id", "o.stock_id", "o.quantity",
-            "o.price", "o.is_buy", "s.stock_name"};
+    private static final String[] COLUMNS = {"o.order_id", "o.user_id", "o.stock_id",
+            "o.quantity", "o.price", "o.is_buy", "s.stock_name"};
 
     private int size = 10; // for getting orders sell/buy
 
@@ -66,7 +66,7 @@ public class OrderDAO {
         return mapToOrderList(rows);
     }
 
-    public List<Order> getNextBuyOrders(int stockId, double lastPrice, int lastOrderId) {
+    public List<Order> getBuyOrders(int stockId, double lastPrice, int lastOrderId) {
         Condition base = new Condition();
         base.add("stock_id", stockId);
         base.add("is_buy", true);
@@ -81,7 +81,7 @@ public class OrderDAO {
         return mapToOrderList(rows);
     }
 
-    public List<Order> getNextSellOrders(int stockId, double lastPrice, int lastOrderId) {
+    public List<Order> getSellOrders(int stockId, double lastPrice, int lastOrderId) {
         Condition base = new Condition();
         base.add("stock_id", stockId);
         base.add("is_buy", false);
