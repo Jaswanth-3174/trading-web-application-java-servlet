@@ -42,10 +42,11 @@ public class MarketApiServlet extends HttpServlet {
             handleOrderBook(req, res);
         }
         else {
-            res.getWriter().print(new JSONObject().put("success", false).put("message", "Invalid API call"));
+            res.getWriter().print(new JSONObject()
+                    .put("success", false)
+                    .put("message", "Invalid API call"));
         }
     }
-
 
     private void handleViewStocks(HttpServletResponse res) throws IOException {
 
@@ -57,7 +58,6 @@ public class MarketApiServlet extends HttpServlet {
             obj.put("name", s.getStockName());
             arr.put(obj);
         }
-
         res.getWriter().print(new JSONObject().put("success", true).put("data", arr));
     }
 

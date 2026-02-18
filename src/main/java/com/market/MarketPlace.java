@@ -31,7 +31,7 @@ public class MarketPlace {
     public Order placeBuyOrder(int userId, String stockName, int quantity, double price){
         Stock stock = stockDAO.findByName(stockName);
         if (stock == null) {
-            System.out.println("Stock not found: " + stockName);
+            System.out.println("Stock not found");
             return null;
         }
 
@@ -71,7 +71,7 @@ public class MarketPlace {
     public Order placeSellOrder(int userId, String stockName, int quantity, double price){
         Stock stock = stockDAO.findByName(stockName);
         if (stock == null) {
-            System.out.println("Stock not found: " + stockName);
+            System.out.println("Stock not found");
             return null;
         }
 

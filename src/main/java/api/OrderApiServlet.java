@@ -312,7 +312,7 @@ public class OrderApiServlet extends HttpServlet {
             double price = Double.parseDouble(parts[1].split("=")[1]);
 
             if(order.getQuantity() == quantity && order.getPrice() == price){
-                response.put("sucess", false);
+                response.put("success", false);
                 response.put("message", "Change the price or quantity to modify!");
                 res.getWriter().print(response);
                 return;
@@ -333,8 +333,8 @@ public class OrderApiServlet extends HttpServlet {
             res.getWriter().print(response);
 
         } catch (Exception e) {
-
             e.printStackTrace();
+
             response.put("success", false);
             response.put("message", "Server error");
             res.getWriter().print(response);

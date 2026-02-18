@@ -15,25 +15,37 @@ public class AuthFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) res;
 
-        HttpSession session = request.getSession(false);
-        String uri = request.getRequestURI();
         String context = request.getContextPath();
+        String uri = request.getRequestURI();
 
-        boolean loggedIn;
-        if (session != null && session.getAttribute("username") != null) {
-            loggedIn = true;
-        } else {
-            loggedIn = false;
+        HttpSession session = request.getSession(false);
+
+        boolean loggedIn = (session != null && session.getAttribute("username") != null);
+
+        response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        response.setHeader("Pragma", "no-cache");
+        response.setDateHeader("Expires", 0);
+
+        if (uri.equals(context + "/")) {
+            if (loggedIn) {
+                response.sendRedirect(context + "/dashboard");
+            } else {
+                response.sendRedirect(context + "/index.html");
+            }
+            return;
         }
 
-        if (uri.endsWith("index.html") || uri.endsWith("signup.html") ||
-                uri.startsWith(context + "/auth") || uri.startsWith(context + "/js") ||
-                uri.startsWith(context + "/css") || uri.startsWith(context + "/images")
-        ) {
-            if (loggedIn && uri.endsWith("index.html")) {
-                response.sendRedirect(context + "/dashboard");
-                return;
-            }
+        boolean isPublic = uri.endsWith("login.html") ||
+                uri.endsWith("signup.html") || uri.startsWith(context + "/auth") ||
+                uri.startsWith(context + "/js") || uri.startsWith(context + "/css") ||
+                uri.startsWith(context + "/images") || uri.endsWith(".ico");
+        if (loggedIn && (uri.endsWith("login.html") || uri.endsWith("signup.html")
+        )) {
+            response.sendRedirect(context + "/dashboard");
+            return;
+        }
+
+        if (isPublic) {
             chain.doFilter(req, res);
             return;
         }
@@ -48,7 +60,15 @@ public class AuthFilter implements Filter {
                 return;
             }
 
-            response.sendRedirect(context + "/index.html");
+            response.sendRedirect(context + "/auth/login.html");
+            return;
+        }
+
+        boolean isValidRoute = uri.startsWith(context + "/dashboard") ||
+                uri.startsWith(context + "/api") || uri.startsWith(context + "/logout");
+
+        if (!isPublic && !isValidRoute) {
+            response.sendRedirect(context + "/dashboard");
             return;
         }
         chain.doFilter(req, res);

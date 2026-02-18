@@ -46,7 +46,8 @@ public class ReportsApiServlet extends HttpServlet {
         }
         else {
             res.getWriter().print(
-                    new JSONObject().put("success", false).put("message", "Invalid API call")
+                    new JSONObject().put("success", false)
+                            .put("message", "Invalid API call")
             );
         }
     }

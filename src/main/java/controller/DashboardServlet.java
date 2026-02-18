@@ -23,7 +23,6 @@ public class DashboardServlet extends HttpServlet {
         res.setDateHeader("Expires", 0);
 
         HttpSession session = req.getSession(false);
-
         if (session == null || session.getAttribute("username") == null) {
             res.sendRedirect("index.html");
             return;
